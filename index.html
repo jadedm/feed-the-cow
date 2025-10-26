@@ -35,23 +35,14 @@
 	<link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
 
 	<!-- imports -->
-	<script src="libs/phaser.js"></script>
-	<script src="Boot.js"></script>
-	<script src="Preloader.js"></script>
-	<script src="StartMenu.js"></script>
-	<script src="Game.js"></script>
+	<script src="/libs/phaser.js"></script>
+	<script>
+		// Initialize global namespace before modules load
+		window.feedTheCow = {};
+	</script>
+	<script type="module" src="/main.js"></script>
 </head>
 
 <body>
-	<script type="text/javascript">
-		window.onload = function(){
-			var game = new Phaser.Game(960, 540, Phaser.CANVAS, '');
-			game.state.add('Boot', feedTheCow.Boot);
-			game.state.add('Preloader', feedTheCow.Preloader);
-			game.state.start('Boot');
-			game.state.add('StartMenu', feedTheCow.StartMenu);
-			game.state.add('Game', feedTheCow.Game);
-		}
-	</script>
 </body>
 </html>

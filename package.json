@@ -1,0 +1,14 @@
+{
+  "name": "feed-the-cow",
+  "version": "1.0.0",
+  "description": "Feed The Cow - A Phaser 2 browser game for World Milk Day",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
