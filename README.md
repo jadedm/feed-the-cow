@@ -5,6 +5,21 @@ A fun, fast-paced browser game built with Phaser 2 for World Milk Day. Help the 
 [![GitHub stars](https://img.shields.io/github/stars/jadedm/feed-the-cow?style=social)](https://github.com/jadedm/feed-the-cow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Title Screen
+![Title Screen](screenshots/feed-the-cow-3.png)
+
+### Gameplay
+![Gameplay](screenshots/feed-the-cow-2.png)
+
+### Game Over
+![Game Over](screenshots/feed-the-cow-1.png)
+
+</div>
+
 ## 📖 About
 
 "Feed The Cow" was created to raise awareness about the importance of natural feed for cattle. In India, there's an alarming gap between the demand and supply of feed & fodder. Most cows are on a diet of man-made concentrates which increases milk production but has long-lasting negative impacts on their health, making medications and injections a necessity.
