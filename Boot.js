@@ -1,9 +1,6 @@
-var feedTheCow = {
-};
+window.feedTheCow.Boot = function(game) {};
 
-feedTheCow.Boot = function(game) {};
-
-feedTheCow.Boot.prototype = {
+window.feedTheCow.Boot.prototype = {
 	
 	preload: function() {
 		this.load.image('preloadBar','images/loader_bar.png');
