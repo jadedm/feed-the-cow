@@ -6,6 +6,9 @@ node_modules/
 # Build output
 dist/
 
+# Documentation
+docs/
+
 # Logs
 *.log
 npm-debug.log*
