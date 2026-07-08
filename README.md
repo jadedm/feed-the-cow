@@ -182,3 +182,9 @@ This project is open source and available under the [MIT License](LICENSE).
 **Made with ❤️ for healthier cows and sustainable dairy farming**
 
 🌾 Feed them good, keep them healthy! 🐄
+
+---
+
+**Built by [Manish Jadhav](https://manishj.com)**, engineer & technical consultant.
+
+Need something like this designed or built? [Inoltro](https://inoltro.ai) is my studio.
