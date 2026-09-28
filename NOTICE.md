@@ -22,10 +22,11 @@ You may not reuse, redistribute or modify them outside this repository without p
 
 | Path | Project | License |
 | --- | --- | --- |
-| `src/libs/phaser.js`, `src/libs/phaser.min.js`, `src/libs/phaser.map` | Phaser v2.4.8, Copyright 2016 Photon Storm Ltd. | MIT |
-| bundled inside `phaser.js` | p2.js, Copyright 2015 p2.js authors | MIT |
-| bundled inside `phaser.js` | PolyK, Copyright 2012 Ivan Kuckir | MIT |
-| bundled inside `phaser.js` | gl-matrix, Copyright 2013 Brandon Jones and Colin MacKenzie IV | BSD 2-clause style |
+| `src/libs/phaser.js`, `src/libs/phaser.min.js`, `src/libs/phaser.map` | Phaser CE v2.20.2, Copyright 2017 Richard Davey, Photon Storm Ltd. | MIT |
+| bundled inside Phaser | pixi.js v2 (Phaser's fork), Copyright 2013-2015 Mathew Groves | MIT |
+| bundled inside Phaser | p2.js, Copyright 2015 p2.js authors | MIT |
+| bundled inside Phaser | PolyK, Copyright 2012 Ivan Kuckir | MIT |
+| bundled inside Phaser | gl-matrix, Copyright 2013 Brandon Jones and Colin MacKenzie IV | BSD 2-clause style |
 | `src/libs/plugins/phaser-plugin-virtual-gamepad.js`, `src/images/gamepad_spritesheet.png` | Phaser Virtual Gamepad, Copyright 2016 Shawn Hymel, joystick math based on work by Eugenio Fage | MIT |
 
-The full license text for each is kept in the header of the file that contains it. The plugin in this repo is patched to run with a joystick and no button.
+The game ships the minified `src/libs/phaser.min.js`, which carries no license text for Phaser or the libraries bundled in it. `src/libs/THIRD-PARTY-LICENSES.txt` reproduces all five and is published next to it. The plugin in this repo is patched to run with a joystick and no button.

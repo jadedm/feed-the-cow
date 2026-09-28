@@ -91,7 +91,8 @@ window.feedTheCow.Game.ITEM_GAP = 20;
 window.feedTheCow.Game.SPAWN_TRIES = 12;
 
 /**
- * Base scroll speed for background
+ * Base scroll speed for background, in pixels per 1/60 s
+ * (see GROUND_SPEED_SCALE)
  */
 window.feedTheCow.Game.SCROLL_SPEED_BASE = 3;
 
@@ -99,6 +100,13 @@ window.feedTheCow.Game.SCROLL_SPEED_BASE = 3;
  * Speed multiplier per second (square root scaled)
  */
 window.feedTheCow.Game.SCROLL_SPEED_MULTIPLIER = 0.5;
+
+/**
+ * The scroll speed constants are in pixels per 1/60 s. Multiply by this for
+ * pixels per second. It is a fixed unit, not the frame rate: Phaser CE runs one
+ * update per display frame, so nothing here depends on how often update runs.
+ */
+window.feedTheCow.Game.GROUND_SPEED_SCALE = 60;
 
 /**
  * Cow movement speed in pixels per second
@@ -210,8 +218,7 @@ window.feedTheCow.Game.prototype = {
    * Uses square root scaling for smooth continuous increase
    * Prevents game from becoming instantly impossible
    * Speed progression: 0s: 3, 16s: ~5, 36s: ~6, 64s: ~7, 100s: ~8
-   * @returns {number} Current scroll speed in pixels per logic step
-   *   (60 steps a second)
+   * @returns {number} Current scroll speed in pixels per 1/60 s
    */
   getScrollSpeed: function () {
     var baseSpeed = window.feedTheCow.Game.SCROLL_SPEED_BASE;
@@ -281,7 +288,8 @@ window.feedTheCow.Game.prototype = {
    * still on their way in, and reset() re-arms it every frame.
    */
   updateItems: function () {
-    var ground = this.getScrollSpeed() * this.time.desiredFps;
+    var ground =
+      this.getScrollSpeed() * window.feedTheCow.Game.GROUND_SPEED_SCALE;
 
     this.grassGroup.forEachAlive(function (g) {
       if (g.x + g.width < 0) this.respawnGrass(g);
@@ -511,7 +519,13 @@ window.feedTheCow.Game.prototype = {
         this.cow.body.velocity.y = 0;
       }
 
-      this.background.tilePosition.x -= this.getScrollSpeed();
+      // Phaser CE updates once per display frame and moves bodies by the real
+      // frame time (time.delta, ms), so the ground must scroll by it too, or it
+      // runs twice as fast on a 120 Hz screen.
+      var groundPxPerSec =
+        this.getScrollSpeed() * window.feedTheCow.Game.GROUND_SPEED_SCALE;
+      var groundStep = (groundPxPerSec * this.time.delta) / 1000;
+      this.background.tilePosition.x -= groundStep;
       this.updateItems();
     }
   },
