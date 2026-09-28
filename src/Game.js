@@ -497,7 +497,8 @@ window.feedTheCow.Game.prototype = {
 
   /**
    * Cleanup function called when state shuts down
-   * Destroys all game objects and removes event listeners
+   * Stops the timer and music, destroys sounds and groups, and removes the
+   * gamepad plugin
    */
   shutdown: function () {
     if (this.timer) {

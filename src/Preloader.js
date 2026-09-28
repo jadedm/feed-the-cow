@@ -7,7 +7,8 @@ window.feedTheCow.Preloader = function (game) {
 
 /**
  * How long to wait for the music to decode before starting anyway, in ms.
- * Without a limit, a browser that cannot decode the MP3 never leaves this screen.
+ * Without a limit, a browser that cannot decode the MP3 never leaves this
+ * screen.
  */
 window.feedTheCow.Preloader.DECODE_TIMEOUT_MS = 5000;
 
@@ -56,8 +57,8 @@ window.feedTheCow.Preloader.prototype = {
 
   update: function () {
     var decoded = this.cache.isSoundDecoded("game_audio");
-    var timedOut =
-      this.time.now - this.loadedAt > window.feedTheCow.Preloader.DECODE_TIMEOUT_MS;
+    var waited = this.time.now - this.loadedAt;
+    var timedOut = waited > window.feedTheCow.Preloader.DECODE_TIMEOUT_MS;
 
     if (this.ready || !(decoded || timedOut)) return;
 
