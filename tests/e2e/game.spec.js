@@ -44,9 +44,11 @@ test.describe("cow", () => {
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const cow = window.__game.state.getCurrentState().cow;
       const seen = new Set();
-      for (let i = 0; i < 20; i++) {
+      // Each frame shows about 71 ms at 14 fps; sample well inside that, for
+      // two full cycles, so a slow runner cannot step over a frame.
+      for (let i = 0; i < 75; i++) {
         seen.add(cow.animations.frame);
-        await sleep(60);
+        await sleep(20);
       }
       return { count: window.__game.cache.getFrameCount("cow"), seen: [...seen].sort() };
     });
@@ -346,7 +348,7 @@ test.describe("input", () => {
       const c = window.__game.state.getCurrentState().cow;
       return { x: c.x + c.width / 2, y: c.y + c.height / 2, top: c.y };
     });
-    await drag(page, isMobile, [cow.x, cow.y], [cow.x, cow.y - 100], { holdMs: 200 });
+    await drag(page, isMobile, [cow.x, cow.y], [cow.x, cow.y - 100], { holdMs: 800 });
     const top = await page.evaluate(() => window.__game.state.getCurrentState().cow.y);
     expect(top).toBeLessThan(cow.top - 40);
   });

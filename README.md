@@ -29,7 +29,7 @@ The game makes the point directly: fresh green fodder keeps the cow going, and i
 
 - The background scrolls faster the longer you survive, following a square-root curve.
 - Injection count climbs from 2 to 23 over the first 50 seconds.
-- Three ways to control the cow: drag with mouse or touch, arrow keys, or an on-screen joystick.
+- Steer the cow around the left three quarters of the field (the rest is where injections come in) with mouse or touch drag, arrow keys or WASD, or an on-screen joystick. The cow eases in and out of every move and has a top speed of 450 px/s, so it cannot cross the field in an instant.
 - Runs in desktop and mobile browsers. The 960x540 canvas scales down to fit smaller screens, to a minimum of 480x260.
 - Sound effects and background music.
 
@@ -37,13 +37,13 @@ The game makes the point directly: fresh green fodder keeps the cow going, and i
 
 | Input | Action |
 | --- | --- |
-| Mouse or touch | Drag the cow up or down |
-| Arrow keys | Up and down move the cow |
-| On-screen joystick | Touch or click and drag, bottom right of the screen |
+| Mouse or touch | Press on the cow and drag; it runs after your pointer and slows as it arrives |
+| Arrow keys or WASD | Move in that direction, diagonals included |
+| On-screen joystick | Touch or click and drag, bottom right of the screen, in any direction |
 
 ## How to play
 
-1. Move the cow up and down to eat the green fodder.
+1. Steer the cow to eat the green fodder.
 2. Each piece of fodder scores 10 points.
 3. Avoid the injections. One hit ends the game.
 4. The background speeds up and more injections appear over time. Survive as long as you can.
