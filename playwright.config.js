@@ -10,10 +10,14 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  // Timing tests measure speed against the wall clock; fewer parallel
+  // browsers on a shared CI runner keeps frame times honest.
+  workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["list"], ["github"]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     viewport: { width: 1200, height: 800 },
+    trace: "retain-on-failure",
   },
   webServer: {
     command: `npx vite preview --port ${PORT} --strictPort`,

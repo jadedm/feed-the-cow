@@ -1,11 +1,13 @@
 // Shared setup for the end-to-end tests.
 //
-// The game keeps its Phaser.Game instance in a local variable, and Phaser CE
-// has no Phaser.GAMES list, so an init script wraps Phaser.Game#boot to
-// expose the instance as window.__game before the game starts.
-import { expect } from "@playwright/test";
+// `test` here is Playwright's test with two automatic fixtures: every page
+// exposes the running Phaser.Game as window.__game, and every test fails if
+// the page logged a console error or threw.
+import { test as base, expect } from "@playwright/test";
 
-export async function exposeGame(page) {
+// The game keeps its Phaser.Game in a local variable. Phaser.GAMES would also
+// reach it on 2.4, but Phaser CE removed that list, so wrap Game#boot instead.
+async function exposeGame(page) {
   await page.addInitScript(() => {
     const hook = setInterval(() => {
       if (!window.Phaser || !window.Phaser.Game) return;
@@ -19,6 +21,37 @@ export async function exposeGame(page) {
   });
 }
 
+// Chrome logs this intervention when a synthetic tap's touchstart is not
+// cancelable and Phaser calls preventDefault on it. It comes from the test's
+// tap, not from the game.
+const BROWSER_NOISE = [/^Ignored attempt to cancel a touch\w+ event with cancelable=false/];
+
+function watchErrors(page) {
+  const errors = [];
+  page.on("console", (message) => {
+    const text = message.text();
+    if (message.type() !== "error" || BROWSER_NOISE.some((re) => re.test(text))) return;
+    errors.push(text);
+  });
+  page.on("pageerror", (error) => errors.push(String(error)));
+  return errors;
+}
+
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await exposeGame(page);
+    await use(page);
+  },
+  pageErrors: [
+    async ({ page }, use) => {
+      const errors = watchErrors(page);
+      await use(errors);
+      expect(errors, "console errors or uncaught exceptions").toEqual([]);
+    },
+    { auto: true },
+  ],
+});
+
 // Replaces requestAnimationFrame with a timer at the given rate, so a test
 // can check that the game runs at the same real-time speed on a 30, 60 or
 // 120 Hz display.
@@ -30,21 +63,23 @@ export async function simulateDisplayHz(page, hz) {
   }, hz);
 }
 
-// Collects console errors and uncaught exceptions for the page's lifetime.
-// Chrome logs this intervention when a synthetic tap's touchstart is not
-// cancelable and Phaser calls preventDefault on it. It comes from the test's
-// tap, not from the game.
-const BROWSER_NOISE = [/^Ignored attempt to cancel a touch\w+ event with cancelable=false/];
-
-export function watchErrors(page) {
-  const errors = [];
-  page.on("console", (message) => {
-    const text = message.text();
-    if (message.type() !== "error" || BROWSER_NOISE.some((re) => re.test(text))) return;
-    errors.push(text);
+// Records when each game state's create() runs, as window.__stateStarted.
+export async function stampStateStarts(page) {
+  await page.addInitScript(() => {
+    window.__stateStarted = {};
+    const hook = setInterval(() => {
+      const states = window.feedTheCow;
+      if (!states || !states.Preloader || !states.StartMenu) return;
+      ["Preloader", "StartMenu"].forEach((name) => {
+        const create = states[name].prototype.create;
+        states[name].prototype.create = function () {
+          window.__stateStarted[name] = performance.now();
+          return create.apply(this, arguments);
+        };
+      });
+      clearInterval(hook);
+    }, 1);
   });
-  page.on("pageerror", (error) => errors.push(String(error)));
-  return errors;
 }
 
 export async function openGame(page) {
@@ -71,10 +106,6 @@ export async function startGameDirectly(page) {
   });
 }
 
-export async function phaserVersion(page) {
-  return page.evaluate(() => window.Phaser.VERSION);
-}
-
 // Page coordinates of a point in the 960x540 game. Read right before every
 // click: the scale manager centres the canvas after the first frames, so a
 // position read once at load goes stale (#16).
@@ -90,6 +121,45 @@ export async function tapOrClick(page, x, y, isMobile) {
     return;
   }
   await page.mouse.click(px, py, { delay: 80 });
+}
+
+// Presses at `from`, holds, moves to `to` in steps, and releases after
+// `holdMs`, in game coordinates. Uses touch on the phone profile (through
+// Chromium's DevTools protocol, since Playwright has no touch drag) and the
+// mouse elsewhere. `during` runs while the pointer is still down.
+export async function drag(page, isMobile, from, to, { holdMs = 400, during } = {}) {
+  const [x0, y0] = await gamePoint(page, ...from);
+  const [x1, y1] = await gamePoint(page, ...to);
+  const steps = 6;
+  if (!isMobile) {
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    // Hold for a few frames first, as a finger would: the gamepad plugin only
+    // takes the joystick if it sees the press inside its radius.
+    await page.waitForTimeout(100);
+    await page.mouse.move(x1, y1, { steps });
+    await page.waitForTimeout(holdMs);
+    const result = during ? await during() : undefined;
+    await page.mouse.up();
+    return result;
+  }
+  const cdp = await page.context().newCDPSession(page);
+  const touch = (type, x, y) =>
+    cdp.send("Input.dispatchTouchEvent", {
+      type,
+      touchPoints: type === "touchEnd" ? [] : [{ x, y, id: 1 }],
+    });
+  await touch("touchStart", x0, y0);
+  await page.waitForTimeout(100);
+  for (let i = 1; i <= steps; i++) {
+    await touch("touchMove", x0 + ((x1 - x0) * i) / steps, y0 + ((y1 - y0) * i) / steps);
+    await page.waitForTimeout(16);
+  }
+  await page.waitForTimeout(holdMs);
+  const result = during ? await during() : undefined;
+  await touch("touchEnd", x1, y1);
+  await cdp.detach();
+  return result;
 }
 
 export async function currentState(page) {
