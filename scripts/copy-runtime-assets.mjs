@@ -9,7 +9,6 @@ import { join } from "node:path";
 
 const RUNTIME_PATHS = [
   "src/images",
-  "src/audio",
   "src/libs/phaser.js",
   "src/libs/plugins",
 ];
