@@ -44,9 +44,11 @@ test.describe("cow", () => {
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const cow = window.__game.state.getCurrentState().cow;
       const seen = new Set();
-      for (let i = 0; i < 20; i++) {
+      // Each frame shows about 71 ms at 14 fps; sample well inside that, for
+      // two full cycles, so a slow runner cannot step over a frame.
+      for (let i = 0; i < 75; i++) {
         seen.add(cow.animations.frame);
-        await sleep(60);
+        await sleep(20);
       }
       return { count: window.__game.cache.getFrameCount("cow"), seen: [...seen].sort() };
     });
