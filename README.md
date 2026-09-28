@@ -68,19 +68,22 @@ The dev server opens the game at `http://localhost:8000`.
 
 ### Production build
 
-Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `vite build` does not copy the assets. Copy `src/` into `dist/` yourself after building:
-
 ```bash
 npm run build
-cp -r src dist/
 npm run preview
 ```
 
-`npm run deploy` does the build and the copy, then publishes `dist/` to the `gh-pages` branch.
+Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `npm run build` runs `vite build` and then copies `src/` into `dist/src/`. Anything that serves the game must serve that copy.
 
-The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
+`npm run deploy` builds and publishes `dist/` to the `gh-pages` branch.
 
-The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
+### Docker
+
+```bash
+docker compose up --build
+```
+
+The game is served by nginx at `http://localhost:8080`.
 
 ## Tech stack
 
@@ -107,7 +110,7 @@ feed-the-cow/
 ├── main.js             # Creates the Phaser game and registers the states
 ├── vite.config.js
 ├── jsdoc.json
-├── Dockerfile          # Two-stage build served by nginx (see Production build)
+├── Dockerfile          # Two-stage build served by nginx
 ├── docker-compose.yml
 ├── nginx.conf
 └── package.json
@@ -158,7 +161,7 @@ To send a change:
 
 1. Fork the repo and create a branch, for example `feature/12-touch-sensitivity` (a prefix, the issue number and a short slug).
 2. Use conventional commit messages, for example `fix: stop cow leaving the top of the screen`.
-3. There is no automated test suite. Build, copy assets and run `npm run preview`, then play the game to check your change.
+3. There is no automated test suite. Run `npm run build` and `npm run preview`, then play the game to check your change.
 4. Open a pull request against `main` and link the issue.
 
 ## License
