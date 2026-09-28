@@ -7,11 +7,13 @@
     "dev": "vite",
     "build": "vite build && node scripts/copy-runtime-assets.mjs && node scripts/check-assets.mjs",
     "check:assets": "node scripts/check-assets.mjs",
+    "test:e2e": "npm run build && playwright test",
     "preview": "vite preview",
     "docs": "jsdoc -c jsdoc.json",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "gh-pages": "^6.3.0",
     "jsdoc": "^4.0.2",
     "vite": "^5.0.0"

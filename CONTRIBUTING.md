@@ -32,16 +32,21 @@ The game opens at `http://localhost:8000`.
 
 ## Checking a change
 
-There is no automated test suite. Before opening a pull request:
+Before opening a pull request:
 
 ```bash
-npm run build
+npx playwright install chromium firefox webkit   # once
+npm run test:e2e
 npm run preview
 ```
 
+`npm run test:e2e` builds the game and runs the end-to-end tests in `tests/e2e/` against the build, in Chromium, Firefox, WebKit and a phone profile. They cover loading, the cow, item speeds at 30, 60 and 120 Hz, spacing and respawns, restarts, keys, joystick and drag by mouse and touch, and two rounds of start, game over and try again. Every test also fails on any console error. To run a subset, build first (`npm run build`), then `npx playwright test -g "joystick"`: the test command alone serves whatever is already in `dist/`.
+
 `npm run build` ends with an asset check (also available alone as `npm run check:assets`). It fails if an asset path written in the game code, `index.html` or the built CSS is missing from the build. It cannot see paths assembled at runtime, such as `"src/images/" + name`, so write asset paths as whole strings. Then play the game in the preview, on a phone-sized window too if you touched controls or layout.
 
-Pull requests run the build and the asset check in CI.
+Pull requests run the build and the end-to-end tests in CI.
+
+When a test drives the game, read the canvas position right before each click (`gamePoint` in `tests/e2e/helpers.js`): the canvas is recentred after the first frames, so an early reading sends clicks off the canvas.
 
 ## Branches and commits
 
