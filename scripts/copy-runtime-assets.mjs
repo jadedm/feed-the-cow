@@ -1,6 +1,6 @@
 // Copies the files the game loads at runtime into dist/.
 //
-// Phaser loads images and audio from string paths such as "src/images/BG.png",
+// Phaser loads images and audio from string paths such as "src/images/field.png",
 // and index.html loads Phaser and the gamepad plugin with plain script tags.
 // Vite sees none of these, so `vite build` leaves them out. The game's own
 // modules and stylesheet are bundled by Vite and are not copied again.

@@ -73,7 +73,7 @@ npm run build
 npm run preview
 ```
 
-Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `npm run build` runs `vite build`, then `scripts/copy-runtime-assets.mjs`, which copies the images, audio, Phaser and the gamepad plugin into `dist/src/`, then `scripts/check-assets.mjs`, which fails the build if anything the game loads is missing. A new asset folder or script tag needs adding to the copy script.
+Phaser loads images and sounds at runtime from paths such as `src/images/field.png`. Vite cannot see those paths, so `npm run build` runs `vite build`, then `scripts/copy-runtime-assets.mjs`, which copies the images, audio, Phaser and the gamepad plugin into `dist/src/`, then `scripts/check-assets.mjs`, which fails the build if anything the game loads is missing. A new asset folder or script tag needs adding to the copy script.
 
 `npm run deploy` builds and publishes `dist/` to the `gh-pages` branch.
 
@@ -168,7 +168,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-The game's images, audio and screenshots, and the woohoo name, logo and campaign text, are not. They stay all rights reserved, so a fork you publish needs its own art, sound and text. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
+Most of the game's images, and its audio, screenshots and the woohoo name, logo and campaign text, are not. They stay all rights reserved, so a fork you publish must replace them; the cow and field art drawn in code is MIT and can be reused. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
 
 ## Acknowledgments
 

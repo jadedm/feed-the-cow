@@ -27,7 +27,7 @@ The game opens at `http://localhost:8000`.
 - This is Phaser 2, not Phaser 3. Examples written for Phaser 3 will not work.
 - Phaser is loaded as a global with a plain script tag in `index.html`. Do not `import` it.
 - Each game state in `src/` attaches itself to `window.feedTheCow` instead of exporting.
-- Images and audio are loaded from string paths such as `src/images/BG.png`. Vite does not see them. If you add an asset folder or a script tag, add it to `scripts/copy-runtime-assets.mjs` too.
+- Images and audio are loaded from string paths such as `src/images/field.png`. Vite does not see them. If you add an asset folder or a script tag, add it to `scripts/copy-runtime-assets.mjs` too.
 - Game balance (speeds, spawn positions, how many injections appear and when) lives in named constants near the top of `src/Game.js`. Change those rather than numbers inside functions.
 
 ## Checking a change

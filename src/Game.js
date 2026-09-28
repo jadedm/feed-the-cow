@@ -106,6 +106,11 @@ window.feedTheCow.Game.SCROLL_SPEED_MULTIPLIER = 0.5;
 window.feedTheCow.Game.COW_SPEED = 300;
 
 /**
+ * Frames per second of the cow's run animation (8 frames in cow-run.png)
+ */
+window.feedTheCow.Game.COW_RUN_FPS = 14;
+
+/**
  * Progressive injection spawning configuration
  * Adds more injections over time at specific thresholds
  * Matrix swarm effect at 50 seconds
@@ -235,9 +240,14 @@ window.feedTheCow.Game.prototype = {
    * Enables drag controls for vertical movement only
    */
   buildCow: function () {
-    this.cow = this.add.sprite(0, this.world.height - 300, "cow");
+    this.cow = this.add.sprite(40, this.world.centerY - 50, "cow");
+    this.cow.animations.add("run");
+    this.cow.animations.play("run", window.feedTheCow.Game.COW_RUN_FPS, true);
     this.cow.inputEnabled = true;
     this.physics.arcade.enable(this.cow);
+    // Torso and head only, so a swinging leg or the tail neither gets hit by
+    // an injection nor collects grass.
+    this.cow.body.setSize(120, 62, 32, 12);
     this.cow.body.collideWorldBounds = true;
     this.cow.input.enableDrag();
     this.cow.input.allowHorizontalDrag = false;
@@ -457,15 +467,15 @@ window.feedTheCow.Game.prototype = {
 
   /**
    * Creates death animation for the cow
-   * Spawns a dead cow sprite with rotation and velocity
+   * Spawns the hit cow sprite, drifting down and slightly right
    * @param {Phaser.Sprite} cow - The original cow sprite
    */
   animateCow: function (cow) {
-    var cowDead = this.add.sprite(cow.x + 200, cow.y, "deadCow");
+    // cow-hit.png is drawn already tipped over, so it is not rotated.
+    var cowDead = this.add.sprite(cow.x, cow.y, "deadCow");
     this.physics.enable(cowDead, Phaser.Physics.ARCADE);
     cowDead.body.velocity.x = 10;
     cowDead.body.velocity.y = 80;
-    cowDead.angle += 120;
   },
 
   /**

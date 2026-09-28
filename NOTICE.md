@@ -1,18 +1,22 @@
 # Licensing notes
 
-The MIT license in `LICENSE` covers the source code in this repository, except the third-party code listed below, which keeps its own license.
+The MIT license in `LICENSE` covers the source code in this repository, and the cow and field art drawn in code (listed below). Third-party code keeps its own license.
 
 ## Not covered: game art, audio and brand
 
 These are not licensed under MIT. All rights are reserved by their owners:
 
-- the images in `src/images/` and the audio in `src/audio/`
+- the images in `src/images/`, except the ones listed under "Covered by MIT" below, and the audio in `src/audio/`
 - the screenshots in `screenshots/`
 - the woohoo name and logo, and the woohoo campaign text, wherever they appear, including the title, description and social tags in `index.html`
 
 You may not reuse, redistribute or modify them outside this repository without permission. To publish a fork of the game, replace the art, audio, screenshots and woohoo text with your own.
 
-One exception: `src/images/gamepad_spritesheet.png` is byte-identical to the joystick graphic distributed with the Phaser Virtual Gamepad plugin, and is covered by that plugin's license, below.
+## Covered by MIT: art drawn in code
+
+`src/images/cow-run.png`, `src/images/cow-hit.png`, `src/images/cow-icon.png` and `src/images/field.png` are rendered from the SVG sources in `art/`, which `art/build-art.mjs` draws in code. They are part of this project and covered by the MIT license with the code.
+
+`src/images/gamepad_spritesheet.png` is not reserved either: it is byte-identical to the joystick graphic distributed with the Phaser Virtual Gamepad plugin, and is covered by that plugin's license, below.
 
 ## Third-party code
 
