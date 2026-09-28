@@ -346,7 +346,7 @@ test.describe("input", () => {
       const c = window.__game.state.getCurrentState().cow;
       return { x: c.x + c.width / 2, y: c.y + c.height / 2, top: c.y };
     });
-    await drag(page, isMobile, [cow.x, cow.y], [cow.x, cow.y - 100], { holdMs: 200 });
+    await drag(page, isMobile, [cow.x, cow.y], [cow.x, cow.y - 100], { holdMs: 800 });
     const top = await page.evaluate(() => window.__game.state.getCurrentState().cow.y);
     expect(top).toBeLessThan(cow.top - 40);
   });
