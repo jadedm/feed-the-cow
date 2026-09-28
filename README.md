@@ -161,7 +161,7 @@ To send a change:
 
 1. Fork the repo and create a branch, for example `feature/12-touch-sensitivity` (a prefix, the issue number and a short slug).
 2. Use conventional commit messages, for example `fix: stop cow leaving the top of the screen`.
-3. There is no automated test suite. Run `npm run build` and `npm run preview`, then play the game to check your change.
+3. There is no automated test suite. Run `npm run build`, then `npm run check:assets`, which fails if any image, sound or script the game loads is missing from the build. Then `npm run preview` and play the game. Pull requests run the build and the asset check in CI.
 4. Open a pull request against `main` and link the issue.
 
 ## License
