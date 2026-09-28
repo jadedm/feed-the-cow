@@ -73,7 +73,7 @@ npm run build
 npm run preview
 ```
 
-Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `npm run build` runs `vite build` and then `scripts/copy-runtime-assets.mjs`, which copies the images, audio, Phaser and the gamepad plugin into `dist/src/`. A new asset folder or script tag needs adding to that script.
+Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `npm run build` runs `vite build`, then `scripts/copy-runtime-assets.mjs`, which copies the images, audio, Phaser and the gamepad plugin into `dist/src/`, then `scripts/check-assets.mjs`, which fails the build if anything the game loads is missing. A new asset folder or script tag needs adding to the copy script.
 
 `npm run deploy` builds and publishes `dist/` to the `gh-pages` branch.
 

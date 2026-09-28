@@ -36,11 +36,10 @@ There is no automated test suite. Before opening a pull request:
 
 ```bash
 npm run build
-npm run check:assets
 npm run preview
 ```
 
-`check:assets` fails if an asset path written in the game code, `index.html` or the built CSS is missing from the build. It cannot see paths assembled at runtime, such as `"src/images/" + name`, so write asset paths as whole strings. Then play the game in the preview, on a phone-sized window too if you touched controls or layout.
+`npm run build` ends with an asset check (also available alone as `npm run check:assets`). It fails if an asset path written in the game code, `index.html` or the built CSS is missing from the build. It cannot see paths assembled at runtime, such as `"src/images/" + name`, so write asset paths as whole strings. Then play the game in the preview, on a phone-sized window too if you touched controls or layout.
 
 Pull requests run the build and the asset check in CI.
 

@@ -21,7 +21,5 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
-
-      - name: Check every runtime asset is in dist/
-        run: npm run check:assets
+      - name: Build, then check every runtime asset is in dist/
+        run: npm run build
