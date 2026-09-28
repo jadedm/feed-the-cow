@@ -67,44 +67,18 @@ window.feedTheCow.Game.SPAWN_Y_MAX_GRASS = 530;
 window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION = 500;
 
 /**
- * Minimum velocity for grass (initial spawn)
+ * Grass speed over the ground, in pixels per second. Drawn once per spawn.
+ * Items move at the ground's speed plus this, so they always travel left
+ * faster than the background as it accelerates.
  */
-window.feedTheCow.Game.GRASS_VELOCITY_MIN = -200;
+window.feedTheCow.Game.GRASS_SPEED_MIN = 20;
+window.feedTheCow.Game.GRASS_SPEED_MAX = 220;
 
 /**
- * Maximum velocity for grass (initial spawn)
+ * Injection speed over the ground, in pixels per second. Drawn once per spawn.
  */
-window.feedTheCow.Game.GRASS_VELOCITY_MAX = -150;
-
-/**
- * Minimum velocity for grass (respawn)
- */
-window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MIN = -400;
-
-/**
- * Maximum velocity for grass (respawn)
- */
-window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MAX = -200;
-
-/**
- * Minimum velocity for injections (initial spawn)
- */
-window.feedTheCow.Game.INJECTION_VELOCITY_MIN = -250;
-
-/**
- * Maximum velocity for injections (initial spawn)
- */
-window.feedTheCow.Game.INJECTION_VELOCITY_MAX = -200;
-
-/**
- * Minimum velocity for injections (respawn)
- */
-window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MIN = -450;
-
-/**
- * Maximum velocity for injections (respawn)
- */
-window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MAX = -400;
+window.feedTheCow.Game.INJECTION_SPEED_MIN = 220;
+window.feedTheCow.Game.INJECTION_SPEED_MAX = 270;
 
 /**
  * Base scroll speed for background
@@ -216,9 +190,9 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(j, Phaser.Physics.ARCADE);
-      j.body.velocity.x = this.rnd.integerInRange(
-        window.feedTheCow.Game.INJECTION_VELOCITY_MIN,
-        window.feedTheCow.Game.INJECTION_VELOCITY_MAX
+      j.speedOverGround = this.rnd.integerInRange(
+        window.feedTheCow.Game.INJECTION_SPEED_MIN,
+        window.feedTheCow.Game.INJECTION_SPEED_MAX
       );
 
       this.totalInjection++;
@@ -230,7 +204,7 @@ window.feedTheCow.Game.prototype = {
    * Uses square root scaling for smooth continuous increase
    * Prevents game from becoming instantly impossible
    * Speed progression: 0s: 3, 16s: ~5, 36s: ~6, 64s: ~7, 100s: ~8
-   * @returns {number} Current scroll speed in pixels per frame
+   * @returns {number} Current scroll speed in pixels per logic step (60 a second)
    */
   getScrollSpeed: function () {
     var baseSpeed = window.feedTheCow.Game.SCROLL_SPEED_BASE;
@@ -286,24 +260,29 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(g, Phaser.Physics.ARCADE);
-      g.body.velocity.x = this.rnd.integerInRange(
-        window.feedTheCow.Game.GRASS_VELOCITY_MIN,
-        window.feedTheCow.Game.GRASS_VELOCITY_MAX
+      g.speedOverGround = this.rnd.integerInRange(
+        window.feedTheCow.Game.GRASS_SPEED_MIN,
+        window.feedTheCow.Game.GRASS_SPEED_MAX
       );
     }
   },
 
   /**
-   * Respawns grass and injections that have scrolled fully past the left edge.
+   * Moves grass and injections at the ground's current speed plus their own,
+   * and respawns any that have scrolled fully past the left edge.
    * Items spawn off-screen to the right, so Phaser's checkWorldBounds cannot
    * be used here: it fires for any sprite outside the world, including ones
    * still on their way in, and reset() re-arms it every frame.
    */
-  recycleOffscreen: function () {
+  updateItems: function () {
+    var ground = this.getScrollSpeed() * this.time.desiredFps;
+
     this.grassGroup.forEachAlive(function (g) {
+      g.body.velocity.x = -(ground + g.speedOverGround);
       if (g.x + g.width < 0) this.respawnGrass(g);
     }, this);
     this.injectionGroup.forEachAlive(function (j) {
+      j.body.velocity.x = -(ground + j.speedOverGround);
       if (j.x + j.width < 0) this.respawnInjection(j);
     }, this);
   },
@@ -326,9 +305,9 @@ window.feedTheCow.Game.prototype = {
           window.feedTheCow.Game.SPAWN_Y_MAX_GRASS
         )
       );
-      g.body.velocity.x = this.rnd.integerInRange(
-        window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MIN,
-        window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MAX
+      g.speedOverGround = this.rnd.integerInRange(
+        window.feedTheCow.Game.GRASS_SPEED_MIN,
+        window.feedTheCow.Game.GRASS_SPEED_MAX
       );
     }
   },
@@ -352,9 +331,9 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(j, Phaser.Physics.ARCADE);
-      j.body.velocity.x = this.rnd.integerInRange(
-        window.feedTheCow.Game.INJECTION_VELOCITY_MIN,
-        window.feedTheCow.Game.INJECTION_VELOCITY_MAX
+      j.speedOverGround = this.rnd.integerInRange(
+        window.feedTheCow.Game.INJECTION_SPEED_MIN,
+        window.feedTheCow.Game.INJECTION_SPEED_MAX
       );
     }
   },
@@ -375,9 +354,9 @@ window.feedTheCow.Game.prototype = {
           window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
         )
       );
-      j.body.velocity.x = this.rnd.integerInRange(
-        window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MIN,
-        window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MAX
+      j.speedOverGround = this.rnd.integerInRange(
+        window.feedTheCow.Game.INJECTION_SPEED_MIN,
+        window.feedTheCow.Game.INJECTION_SPEED_MAX
       );
     }
   },
@@ -491,7 +470,7 @@ window.feedTheCow.Game.prototype = {
       }
 
       this.background.tilePosition.x -= this.getScrollSpeed();
-      this.recycleOffscreen();
+      this.updateItems();
     }
   },
 

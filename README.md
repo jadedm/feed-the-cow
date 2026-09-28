@@ -133,16 +133,16 @@ This writes JSDoc output to `docs/`. Open `docs/index.html` to read it.
 
 ### Speed
 
-Background scroll speed is `3 + √(seconds) × 0.5` pixels per frame:
+Background scroll speed is `3 + √(seconds) × 0.5` pixels per game step. The game logic runs 60 steps a second:
 
-| Time | Speed (px/frame) |
-| --- | --- |
-| 0s | 3 |
-| 16s | 5 |
-| 36s | 6 |
-| 64s | 7 |
+| Time | px/step | px/s |
+| --- | --- | --- |
+| 0s | 3 | 180 |
+| 16s | 5 | 300 |
+| 36s | 6 | 360 |
+| 64s | 7 | 420 |
 
-Only the background speeds up, with no upper limit. Fodder and injections move at fixed speed ranges set in `src/Game.js`.
+The speed has no upper limit. Fodder and injections move at the ground's speed plus their own, so they keep coming at the cow faster than the background as it accelerates: fodder 20 to 220 px/s over the ground, injections 220 to 270 px/s. The ranges are constants near the top of `src/Game.js`.
 
 ### Injection spawning
 
