@@ -2,7 +2,14 @@ window.feedTheCow.Preloader = function (game) {
   this.preloadBar = null;
   this.titleText = null;
   this.ready = false;
+  this.loadedAt = 0;
 };
+
+/**
+ * How long to wait for the music to decode before starting anyway, in ms.
+ * Without a limit, a browser that cannot decode the MP3 never leaves this screen.
+ */
+window.feedTheCow.Preloader.DECODE_TIMEOUT_MS = 5000;
 
 window.feedTheCow.Preloader.prototype = {
   preload: function () {
@@ -39,12 +46,22 @@ window.feedTheCow.Preloader.prototype = {
 
   create: function () {
     this.preloadBar.cropEnabled = false; //force show the whole thing
+    this.loadedAt = this.time.now;
+
+    // One shared click sound for every state. A sound added per state visit
+    // stays in the SoundManager forever, and destroying it on shutdown cuts
+    // it off before it is heard.
+    window.feedTheCow.selectSound = this.add.audio("select_audio");
   },
 
   update: function () {
-    if (this.cache.isSoundDecoded("game_audio") && !this.ready) {
-      this.ready = true;
-      this.state.start("StartMenu");
-    }
+    var decoded = this.cache.isSoundDecoded("game_audio");
+    var timedOut =
+      this.time.now - this.loadedAt > window.feedTheCow.Preloader.DECODE_TIMEOUT_MS;
+
+    if (this.ready || !(decoded || timedOut)) return;
+
+    this.ready = true;
+    this.state.start("StartMenu");
   },
 };
