@@ -159,16 +159,13 @@ These values live as named constants near the top of `src/Game.js`. Change them 
 
 Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issues). Questions and open-ended discussion go in [Discussions](https://github.com/jadedm/feed-the-cow/discussions).
 
-To send a change:
-
-1. Fork the repo and create a branch, for example `feature/12-touch-sensitivity` (a prefix, the issue number and a short slug).
-2. Use conventional commit messages, for example `fix: stop cow leaving the top of the screen`.
-3. There is no automated test suite. Run `npm run build`, then `npm run check:assets`, which fails if an asset path written in the game code or in `index.html` is missing from the build. It cannot see paths assembled at runtime, so write asset paths as whole strings. Then `npm run preview` and play the game. Pull requests run the build and the asset check in CI.
-4. Open a pull request against `main` and link the issue.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, how to check a change, and branch and commit conventions.
 
 ## License
 
-A license file has not been added yet. Until it is, the code carries no open source license. Tracked in [#8](https://github.com/jadedm/feed-the-cow/issues/8).
+The code is under the [MIT License](LICENSE).
+
+The game's images and audio, and the woohoo name and logo, are not. They stay all rights reserved, so a fork you publish needs its own art and sound. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, both MIT).
 
 ## Acknowledgments
 
