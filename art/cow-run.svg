@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="100" viewBox="0 0 960 100">
-  <g transform="translate(0 0.0)">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="100" viewBox="0 0 1280 100">
+  <g transform="translate(0 1) rotate(-2 76 48)">
     
-    <line x1="102" y1="62" x2="113.0" y2="85.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="113.0" y2="85.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="113.0" cy="85.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 99.1 75.7 83.2 77.9" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 99.1 75.7 83.2 77.9" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="83.2" cy="77.9" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="45.0" y2="85.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="45.0" y2="85.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="45.0" cy="85.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 63.0 74.1 64.7 90.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 63.0 74.1 64.7 90.0" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="64.7" cy="90.0" r="5" fill="#2b2b2b"/>
     
     <path d="M36 40 Q24 38 16 50" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
     <ellipse cx="16" cy="53" rx="4" ry="6" fill="#2b2b2b" transform="rotate(20 16 53)"/>
@@ -21,13 +21,13 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="94.0" y2="90.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="94.0" y2="90.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="94.0" cy="90.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 95.0 76.0 80.1 82.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 95.0 76.0 80.1 82.0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="80.1" cy="82.0" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="48.0" y2="90.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="48.0" y2="90.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="48.0" cy="90.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 53.7 74.8 58.1 90.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 53.7 74.8 58.1 90.2" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="58.1" cy="90.2" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
@@ -44,18 +44,18 @@
     <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
     <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
   </g>
-  <g transform="translate(160 -2.6)">
+  <g transform="translate(160 1) rotate(0 76 48)">
     
-    <line x1="102" y1="62" x2="114.9" y2="84.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="114.9" y2="84.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="114.9" cy="84.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 103.0 76.0 88.1 82.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 103.0 76.0 88.1 82.0" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="88.1" cy="82.0" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="43.1" y2="84.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="43.1" y2="84.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="43.1" cy="84.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 61.7 74.8 66.1 90.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 61.7 74.8 66.1 90.2" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="66.1" cy="90.2" r="5" fill="#2b2b2b"/>
     
-    <path d="M36 40 Q24 41.46410161513776 13.401923788646684 55.19615242270663" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-    <ellipse cx="13.401923788646684" cy="58.19615242270663" rx="4" ry="6" fill="#2b2b2b" transform="rotate(32.99038105676658 13.401923788646684 58.19615242270663)"/>
+    <path d="M36 40 Q24 40.82842712474619 13.878679656440358 54.242640687119284" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="13.878679656440358" cy="57.242640687119284" rx="4" ry="6" fill="#2b2b2b" transform="rotate(30.606601717798213 13.878679656440358 57.242640687119284)"/>
     
     <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
     <clipPath id="hide1"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
@@ -66,13 +66,13 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="106.1" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="106.1" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="106.1" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 99.7 74.8 94.2 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 99.7 74.8 94.2 89.8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="94.2" cy="89.8" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="35.9" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="35.9" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="35.9" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 49.0 76.0 49.0 92.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 49.0 76.0 49.0 92.0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="49.0" cy="92.0" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
@@ -89,18 +89,18 @@
     <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
     <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
   </g>
-  <g transform="translate(320 -2.6)">
+  <g transform="translate(320 0) rotate(3 76 48)">
     
-    <line x1="102" y1="62" x2="104.1" y2="87.9" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="104.1" y2="87.9" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="104.1" cy="87.9" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 107.7 74.8 102.2 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 107.7 74.8 102.2 89.8" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="102.2" cy="89.8" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="53.9" y2="87.9" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="53.9" y2="87.9" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="53.9" cy="87.9" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 57.0 76.0 57.0 92.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 57.0 76.0 57.0 92.0" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="57.0" cy="92.0" r="5" fill="#2b2b2b"/>
     
-    <path d="M36 40 Q24 41.46410161513776 13.401923788646684 55.19615242270663" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-    <ellipse cx="13.401923788646684" cy="58.19615242270663" rx="4" ry="6" fill="#2b2b2b" transform="rotate(32.99038105676658 13.401923788646684 58.19615242270663)"/>
+    <path d="M36 40 Q24 42 13 56" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="13" cy="59" rx="4" ry="6" fill="#2b2b2b" transform="rotate(35 13 59)"/>
     
     <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
     <clipPath id="hide2"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
@@ -111,13 +111,13 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="106.1" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="106.1" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="106.1" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 101.8 73.6 108.3 88.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 101.8 73.6 108.3 88.2" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="108.3" cy="88.2" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="35.9" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="35.9" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="35.9" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 43.2 75.2 36.7 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 43.2 75.2 36.7 89.8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="36.7" cy="89.8" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
@@ -134,18 +134,18 @@
     <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
     <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
   </g>
-  <g transform="translate(480 -0.0)">
+  <g transform="translate(480 -1) rotate(4 76 48)">
     
-    <line x1="102" y1="62" x2="91.0" y2="85.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="91.0" y2="85.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="91.0" cy="85.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 109.8 73.6 116.3 88.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 109.8 73.6 116.3 88.2" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="116.3" cy="88.2" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="67.0" y2="85.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="67.0" y2="85.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="67.0" cy="85.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 51.2 75.2 44.7 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 51.2 75.2 44.7 89.8" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="44.7" cy="89.8" r="5" fill="#2b2b2b"/>
     
-    <path d="M36 40 Q24 38 16 50" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-    <ellipse cx="16" cy="53" rx="4" ry="6" fill="#2b2b2b" transform="rotate(20.000000000000004 16 53)"/>
+    <path d="M36 40 Q24 40.82842712474619 13.878679656440358 54.242640687119284" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="13.878679656440358" cy="57.242640687119284" rx="4" ry="6" fill="#2b2b2b" transform="rotate(30.606601717798213 13.878679656440358 57.242640687119284)"/>
     
     <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
     <clipPath id="hide3"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
@@ -156,13 +156,13 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="94.0" y2="90.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="94.0" y2="90.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="94.0" cy="90.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 98.8 75.2 104.3 90.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 98.8 75.2 104.3 90.2" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="104.3" cy="90.2" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="48.0" y2="90.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="48.0" y2="90.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="48.0" cy="90.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 39.8 73.3 26.8 82.7" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 39.8 73.3 26.8 82.7" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="26.8" cy="82.7" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
@@ -179,18 +179,18 @@
     <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
     <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
   </g>
-  <g transform="translate(640 -2.6)">
+  <g transform="translate(640 1) rotate(-1 76 48)">
     
-    <line x1="102" y1="62" x2="89.1" y2="84.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="89.1" y2="84.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="89.1" cy="84.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 106.8 75.2 112.3 90.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 106.8 75.2 112.3 90.2" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="112.3" cy="90.2" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="68.9" y2="84.6" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="68.9" y2="84.6" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="68.9" cy="84.6" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 47.8 73.3 34.8 82.7" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 47.8 73.3 34.8 82.7" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="34.8" cy="82.7" r="5" fill="#2b2b2b"/>
     
-    <path d="M36 40 Q24 34.53589838486224 18.598076211353316 44.80384757729337" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-    <ellipse cx="18.598076211353316" cy="47.80384757729337" rx="4" ry="6" fill="#2b2b2b" transform="rotate(7.0096189432334235 18.598076211353316 47.80384757729337)"/>
+    <path d="M36 40 Q24 38 16 50" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="16" cy="53" rx="4" ry="6" fill="#2b2b2b" transform="rotate(20.000000000000004 16 53)"/>
     
     <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
     <clipPath id="hide4"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
@@ -201,13 +201,13 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="81.9" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="81.9" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="81.9" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 94.0 76.0 94.0 92.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 94.0 76.0 94.0 92.0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="94.0" cy="92.0" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="60.1" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="60.1" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="60.1" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 42.8 75.0 26.9 77.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 42.8 75.0 26.9 77.2" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="26.9" cy="77.2" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
@@ -224,18 +224,18 @@
     <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
     <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
   </g>
-  <g transform="translate(800 -2.6)">
+  <g transform="translate(800 1) rotate(-3 76 48)">
     
-    <line x1="102" y1="62" x2="99.9" y2="87.9" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="102" y1="62" x2="99.9" y2="87.9" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="99.9" cy="87.9" r="5.5" fill="#2b2b2b"/>
+    <polyline points="102.0 62.0 102.0 76.0 102.0 92.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 102.0 76.0 102.0 92.0" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="102.0" cy="92.0" r="5" fill="#2b2b2b"/>
     
-    <line x1="56" y1="62" x2="58.1" y2="87.9" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="56" y1="62" x2="58.1" y2="87.9" stroke="#e4e4e4" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="58.1" cy="87.9" r="5.5" fill="#2b2b2b"/>
+    <polyline points="56.0 62.0 50.8 75.0 34.9 77.2" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 50.8 75.0 34.9 77.2" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="34.9" cy="77.2" r="5" fill="#2b2b2b"/>
     
-    <path d="M36 40 Q24 34.53589838486224 18.598076211353316 44.80384757729337" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-    <ellipse cx="18.598076211353316" cy="47.80384757729337" rx="4" ry="6" fill="#2b2b2b" transform="rotate(7.009618943233422 18.598076211353316 47.80384757729337)"/>
+    <path d="M36 40 Q24 35.17157287525381 18.121320343559642 45.757359312880716" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="18.121320343559642" cy="48.757359312880716" rx="4" ry="6" fill="#2b2b2b" transform="rotate(9.393398282201789 18.121320343559642 48.757359312880716)"/>
     
     <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
     <clipPath id="hide5"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
@@ -246,13 +246,103 @@
     </g>
     <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
     
-    <line x1="94" y1="64" x2="81.9" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="94" y1="64" x2="81.9" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="81.9" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="94.0 62.0 89.2 75.2 82.7 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 89.2 75.2 82.7 89.8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="82.7" cy="89.8" r="5" fill="#2b2b2b"/>
     
-    <line x1="48" y1="64" x2="60.1" y2="87.0" stroke="#2b2b2b" stroke-width="13" stroke-linecap="round"/>
-    <line x1="48" y1="64" x2="60.1" y2="87.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="60.1" cy="87.0" r="5.5" fill="#2b2b2b"/>
+    <polyline points="48.0 62.0 48.5 76.0 33.5 81.5" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 48.5 76.0 33.5 81.5" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="33.5" cy="81.5" r="5" fill="#2b2b2b"/>
+    
+    <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
+    <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
+    <path d="M133 21 q3 -9 -2 -13" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
+    <path d="M133 21 q3 -9 -2 -13" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="108" cy="27" rx="10" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="3" transform="rotate(-25 108 27)"/>
+    <ellipse cx="108" cy="27" rx="5" ry="2.5" fill="#f4a6b8" transform="rotate(-25 108 27)"/>
+    <ellipse cx="127" cy="35" rx="19" ry="17" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
+    <path d="M118 22 q8 -4 12 3 q-6 6 -12 -3z" fill="#2f2f2f"/>
+    <ellipse cx="141" cy="45" rx="12" ry="9" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="3"/>
+    <ellipse cx="137" cy="44" rx="1.8" ry="2.6" fill="#2b2b2b"/>
+    <ellipse cx="145" cy="44" rx="1.8" ry="2.6" fill="#2b2b2b"/>
+    
+    <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
+    <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
+  </g>
+  <g transform="translate(960 -3) rotate(-1 76 48)">
+    
+    <polyline points="102.0 62.0 97.2 75.2 90.7 89.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 97.2 75.2 90.7 89.8" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="90.7" cy="89.8" r="5" fill="#2b2b2b"/>
+    
+    <polyline points="56.0 62.0 56.5 76.0 41.5 81.5" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 56.5 76.0 41.5 81.5" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="41.5" cy="81.5" r="5" fill="#2b2b2b"/>
+    
+    <path d="M36 40 Q24 34 19 44" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="19" cy="47" rx="4" ry="6" fill="#2b2b2b" transform="rotate(5 19 47)"/>
+    
+    <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
+    <clipPath id="hide6"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
+    <g clip-path="url(#hide6)" fill="#2f2f2f">
+      <path d="M44 24 q14 -2 18 10 q-4 12 -18 8 q-10 -8 0 -18z"/>
+      <path d="M78 52 q12 -6 20 4 q2 12 -12 14 q-12 -4 -8 -18z"/>
+      <path d="M100 26 q10 2 12 12 q-8 4 -14 -2z"/>
+    </g>
+    <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
+    
+    <polyline points="94.0 62.0 86.2 73.6 72.3 81.6" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 86.2 73.6 72.3 81.6" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="72.3" cy="81.6" r="5" fill="#2b2b2b"/>
+    
+    <polyline points="48.0 62.0 53.2 75.0 45.2 88.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 53.2 75.0 45.2 88.8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="45.2" cy="88.8" r="5" fill="#2b2b2b"/>
+    
+    <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
+    <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
+    <path d="M133 21 q3 -9 -2 -13" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
+    <path d="M133 21 q3 -9 -2 -13" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="108" cy="27" rx="10" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="3" transform="rotate(-25 108 27)"/>
+    <ellipse cx="108" cy="27" rx="5" ry="2.5" fill="#f4a6b8" transform="rotate(-25 108 27)"/>
+    <ellipse cx="127" cy="35" rx="19" ry="17" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
+    <path d="M118 22 q8 -4 12 3 q-6 6 -12 -3z" fill="#2f2f2f"/>
+    <ellipse cx="141" cy="45" rx="12" ry="9" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="3"/>
+    <ellipse cx="137" cy="44" rx="1.8" ry="2.6" fill="#2b2b2b"/>
+    <ellipse cx="145" cy="44" rx="1.8" ry="2.6" fill="#2b2b2b"/>
+    
+    <circle cx="129" cy="31" r="4" fill="#2b2b2b"/>
+    <circle cx="130.4" cy="29.6" r="1.4" fill="#ffffff"/>
+  </g>
+  <g transform="translate(1120 -4) rotate(0 76 48)">
+    
+    <polyline points="102.0 62.0 94.2 73.6 80.3 81.6" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="102.0 62.0 94.2 73.6 80.3 81.6" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="80.3" cy="81.6" r="5" fill="#2b2b2b"/>
+    
+    <polyline points="56.0 62.0 61.2 75.0 53.2 88.8" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="56.0 62.0 61.2 75.0 53.2 88.8" fill="none" stroke="#e4e4e4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="53.2" cy="88.8" r="5" fill="#2b2b2b"/>
+    
+    <path d="M36 40 Q24 35.17157287525381 18.121320343559642 45.757359312880716" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="18.121320343559642" cy="48.757359312880716" rx="4" ry="6" fill="#2b2b2b" transform="rotate(9.393398282201785 18.121320343559642 48.757359312880716)"/>
+    
+    <ellipse cx="76" cy="48" rx="46" ry="24" fill="#ffffff" stroke="#2b2b2b" stroke-width="3"/>
+    <clipPath id="hide7"><ellipse cx="76" cy="48" rx="44.5" ry="22.5"/></clipPath>
+    <g clip-path="url(#hide7)" fill="#2f2f2f">
+      <path d="M44 24 q14 -2 18 10 q-4 12 -18 8 q-10 -8 0 -18z"/>
+      <path d="M78 52 q12 -6 20 4 q2 12 -12 14 q-12 -4 -8 -18z"/>
+      <path d="M100 26 q10 2 12 12 q-8 4 -14 -2z"/>
+    </g>
+    <ellipse cx="80" cy="70" rx="9" ry="5" fill="#f4a6b8" stroke="#2b2b2b" stroke-width="2.5"/>
+    
+    <polyline points="94.0 62.0 91.1 75.7 75.2 77.9" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="94.0 62.0 91.1 75.7 75.2 77.9" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="75.2" cy="77.9" r="5" fill="#2b2b2b"/>
+    
+    <polyline points="48.0 62.0 55.0 74.1 56.7 90.0" fill="none" stroke="#2b2b2b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="48.0 62.0 55.0 74.1 56.7 90.0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="56.7" cy="90.0" r="5" fill="#2b2b2b"/>
     
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/>
     <path d="M118 22 q-2 -9 4 -12" fill="none" stroke="#f1dfa8" stroke-width="3" stroke-linecap="round"/>

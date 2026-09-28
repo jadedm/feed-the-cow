@@ -106,9 +106,9 @@ window.feedTheCow.Game.SCROLL_SPEED_MULTIPLIER = 0.5;
 window.feedTheCow.Game.COW_SPEED = 300;
 
 /**
- * Frames per second of the cow's run animation (6 frames in cow-run.png)
+ * Frames per second of the cow's run animation (8 frames in cow-run.png)
  */
-window.feedTheCow.Game.COW_RUN_FPS = 12;
+window.feedTheCow.Game.COW_RUN_FPS = 14;
 
 /**
  * Progressive injection spawning configuration
@@ -245,7 +245,8 @@ window.feedTheCow.Game.prototype = {
     this.cow.animations.play("run", window.feedTheCow.Game.COW_RUN_FPS, true);
     this.cow.inputEnabled = true;
     this.physics.arcade.enable(this.cow);
-    // Torso and head only, so a hit on a swinging leg or the tail is a miss.
+    // Torso and head only, so a swinging leg or the tail neither gets hit by
+    // an injection nor collects grass.
     this.cow.body.setSize(120, 62, 32, 12);
     this.cow.body.collideWorldBounds = true;
     this.cow.input.enableDrag();
@@ -466,11 +467,11 @@ window.feedTheCow.Game.prototype = {
 
   /**
    * Creates death animation for the cow
-   * Spawns a dead cow sprite with rotation and velocity
+   * Spawns the hit cow sprite, drifting down and slightly right
    * @param {Phaser.Sprite} cow - The original cow sprite
    */
   animateCow: function (cow) {
-    // cow-hit.png is drawn already tipped over, so it only drifts down.
+    // cow-hit.png is drawn already tipped over, so it is not rotated.
     var cowDead = this.add.sprite(cow.x, cow.y, "deadCow");
     this.physics.enable(cowDead, Phaser.Physics.ARCADE);
     cowDead.body.velocity.x = 10;

@@ -29,7 +29,7 @@ window.feedTheCow.Preloader.prototype = {
     this.titleText.anchor.setTo(0.5, 0.5);
     this.load.image("titlescreen", "src/images/title.png");
     this.load.image("bg", "src/images/field.png");
-    this.load.spritesheet("cow", "src/images/cow-run.png", 160, 100, 6);
+    this.load.spritesheet("cow", "src/images/cow-run.png", 160, 100, 8);
     this.load.image("grass", "src/images/grass.png");
     this.load.image("injection", "src/images/injection.png");
     this.load.image("deadCow", "src/images/cow-hit.png");

@@ -18,19 +18,43 @@ const HORN = "#f1dfa8";
 
 export const FRAME_W = 160;
 export const FRAME_H = 100;
-export const RUN_FRAMES = 6;
+export const RUN_FRAMES = 8;
 
-function leg(hipX, hipY, angleDeg, far) {
-  const length = 26;
-  const rad = (angleDeg * Math.PI) / 180;
-  const footX = hipX + Math.sin(rad) * length;
-  const footY = hipY + Math.cos(rad) * length;
+const UPPER_LEG = 14;
+const LOWER_LEG = 16;
+
+// A leg in two segments. `thigh` is the upper segment's angle from straight
+// down, positive toward the front (right). `bend` folds the lower segment back
+// from the line of the upper one, as a knee or hock does when the leg lifts.
+function leg(hipX, hipY, thigh, bend, far) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const kneeX = hipX + Math.sin(toRad(thigh)) * UPPER_LEG;
+  const kneeY = hipY + Math.cos(toRad(thigh)) * UPPER_LEG;
+  const shin = thigh - bend;
+  const footX = kneeX + Math.sin(toRad(shin)) * LOWER_LEG;
+  const footY = kneeY + Math.cos(toRad(shin)) * LOWER_LEG;
+  const points = [hipX, hipY, kneeX, kneeY, footX, footY].map((n) => n.toFixed(1)).join(" ");
   const fill = far ? HIDE_FAR : HIDE;
   return `
-    <line x1="${hipX}" y1="${hipY}" x2="${footX.toFixed(1)}" y2="${footY.toFixed(1)}" stroke="${INK}" stroke-width="13" stroke-linecap="round"/>
-    <line x1="${hipX}" y1="${hipY}" x2="${footX.toFixed(1)}" y2="${footY.toFixed(1)}" stroke="${fill}" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="${footX.toFixed(1)}" cy="${footY.toFixed(1)}" r="5.5" fill="${INK}"/>`;
+    <polyline points="${points}" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="${points}" fill="none" stroke="${fill}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${footX.toFixed(1)}" cy="${footY.toFixed(1)}" r="5" fill="${INK}"/>`;
 }
+
+// Gallop keyframes after Eadweard Muybridge, "The Horse in Motion" (1878,
+// public domain). One [thigh, bend] pair per frame for the leading leg of
+// each pair; the trailing leg of the pair runs one frame behind it.
+// Frames 0 to 2: hind pair lands and pushes. 3 to 5: front pair lands and
+// pushes. 6 and 7: all four legs gathered under the body, in the air.
+const HIND_GAIT = [
+  [24, 8], [4, 4], [-20, 4], [-36, 18], [-22, 60], [2, 72], [22, 52], [30, 24],
+];
+const FRONT_GAIT = [
+  [4, 72], [24, 44], [34, 10], [20, 0], [0, 0], [-20, 4], [-34, 26], [-12, 70],
+];
+// Body lift (negative is up) and nose-up tilt in degrees, per frame.
+const BODY_BOB = [1, 1, 0, -1, 1, 1, -3, -4];
+const BODY_TILT = [2, 0, -3, -4, 1, 3, 1, 0];
 
 function tail(swing) {
   const tipX = 16 - swing * 3;
@@ -76,21 +100,20 @@ function body(id) {
 }
 
 function runFrame(index) {
-  const phase = (index / RUN_FRAMES) * Math.PI * 2;
-  const swing = 32;
-  const bob = -3 * Math.abs(Math.sin(phase));
-  const frontNear = swing * Math.sin(phase);
-  const frontFar = swing * Math.sin(phase + 0.9);
-  const backNear = swing * Math.sin(phase + Math.PI);
-  const backFar = swing * Math.sin(phase + Math.PI + 0.9);
+  const trailing = (index + RUN_FRAMES - 1) % RUN_FRAMES;
+  const [hindThigh, hindBend] = HIND_GAIT[index];
+  const [hindFarThigh, hindFarBend] = HIND_GAIT[trailing];
+  const [frontThigh, frontBend] = FRONT_GAIT[index];
+  const [frontFarThigh, frontFarBend] = FRONT_GAIT[trailing];
+  const tailSwing = Math.sin((index / RUN_FRAMES) * Math.PI * 2);
   return `
-  <g transform="translate(${index * FRAME_W} ${bob.toFixed(1)})">
-    ${leg(102, 62, frontFar, true)}
-    ${leg(56, 62, backFar, true)}
-    ${tail(Math.sin(phase))}
+  <g transform="translate(${index * FRAME_W} ${BODY_BOB[index]}) rotate(${-BODY_TILT[index]} 76 48)">
+    ${leg(102, 62, frontFarThigh, frontFarBend, true)}
+    ${leg(56, 62, hindFarThigh, hindFarBend, true)}
+    ${tail(tailSwing)}
     ${body("hide" + index)}
-    ${leg(94, 64, frontNear, false)}
-    ${leg(48, 64, backNear, false)}
+    ${leg(94, 62, frontThigh, frontBend, false)}
+    ${leg(48, 62, hindThigh, hindBend, false)}
     ${head(OPEN_EYE)}
   </g>`;
 }
@@ -110,12 +133,12 @@ function hitCow() {
     FRAME_H,
     `
   <g transform="rotate(-14 80 50)">
-    ${leg(102, 62, 150, true)}
-    ${leg(56, 62, -150, true)}
+    ${leg(102, 62, 150, 20, true)}
+    ${leg(56, 62, -150, -20, true)}
     ${tail(1)}
     ${body("hide-hit")}
-    ${leg(94, 64, 130, false)}
-    ${leg(48, 64, -130, false)}
+    ${leg(94, 62, 130, 20, false)}
+    ${leg(48, 62, -130, -20, false)}
     ${head(CROSSED_EYE)}
     <path d="M140 53 q3 8 -2 10" fill="${PINK}" stroke="${INK}" stroke-width="2"/>
   </g>
@@ -131,7 +154,7 @@ function icon() {
     64,
     64,
     `
-  <g transform="translate(-99 -4) scale(1)">
+  <g transform="translate(-94 -4)">
     ${head(OPEN_EYE)}
   </g>`
   );

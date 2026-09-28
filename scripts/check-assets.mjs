@@ -1,6 +1,6 @@
 // Fails when the build output is missing a file the game requests at runtime.
 //
-// Phaser loads assets from string paths such as "src/images/BG.png", which
+// Phaser loads assets from string paths such as "src/images/field.png", which
 // Vite never sees, and index.html loads Phaser itself with plain script tags.
 // `vite preview` answers a missing file with index.html and a 200, so a broken
 // build can look fine locally. This script reads every such path and checks

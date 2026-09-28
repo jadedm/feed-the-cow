@@ -4,7 +4,7 @@ The running cow, the hit cow, the favicon cow and the field background are drawn
 
 | Source | Rendered to | Size |
 | --- | --- | --- |
-| `cow-run.svg` | `src/images/cow-run.png` | 960x100, six 160x100 frames |
+| `cow-run.svg` | `src/images/cow-run.png` | 1280x100, eight 160x100 frames |
 | `cow-hit.svg` | `src/images/cow-hit.png` | 160x100 |
 | `cow-icon.svg` | `src/images/cow-icon.png` | 64x64 |
 | `field.svg` | `src/images/field.png` | 960x540, repeats left to right |
