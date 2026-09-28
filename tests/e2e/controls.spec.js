@@ -264,37 +264,42 @@ test.describe("same feel on any display rate", () => {
         const cow = window.__game.state.getCurrentState().cow;
         cow.x = 0;
       });
-      // Time from the key press to 63% of top speed, from page timestamps so
-      // test-runner timing does not matter. The easing's response time is
-      // 0.08 s, plus up to one frame before the game sees the key (33 ms at
-      // 30 Hz). Easing counted per frame instead of by time would take about
-      // 0.16 s at 30 Hz and 0.04 s at 120 Hz.
+      // How fast the speed rises, not when it starts: the time between 30%
+      // and 80% of top speed. For easing with a 0.08 s response time that is
+      // 0.08 x ln(0.7 / 0.2) = 0.10 s at any display rate, and it does not
+      // depend on when the game first sees the key. Easing counted per frame
+      // instead of by time gives about 0.20 s at 30 Hz and 0.05 s at 120 Hz.
       await page.evaluate(() => {
-        window.__pressedAt = null;
         window.__speeds = [];
         window.__sampling = true;
-        window.addEventListener("keydown", () => {
-          window.__pressedAt = window.__pressedAt || performance.now();
-        });
         const sample = () => {
           const body = window.__game.state.getCurrentState().cow.body;
           window.__speeds.push({ t: performance.now(), v: body.velocity.x });
           if (window.__sampling) requestAnimationFrame(sample);
         };
-        requestAnimationFrame(sample);
+        // One sample now, at rest, so the first crossing has a point before it
+        // even when the next frame comes after the key press.
+        sample();
       });
       await page.keyboard.down("ArrowRight");
       await page.waitForTimeout(400);
-      const response = await page.evaluate((top) => {
+      const rise = await page.evaluate((top) => {
         window.__sampling = false;
-        const reached = window.__speeds.find((s) => s.v >= top * 0.632);
-        return reached ? (reached.t - window.__pressedAt) / 1000 : null;
+        const speeds = window.__speeds;
+        // Time the speed crosses `level`, interpolated between samples.
+        const crossing = (level) => {
+          const i = speeds.findIndex((s) => s.v >= level);
+          if (i < 1) return null;
+          const a = speeds[i - 1];
+          const b = speeds[i];
+          return a.t + ((level - a.v) / (b.v - a.v)) * (b.t - a.t);
+        };
+        const t30 = crossing(top * 0.3);
+        const t80 = crossing(top * 0.8);
+        return t30 === null || t80 === null ? null : (t80 - t30) / 1000;
       }, TOP_SPEED);
-      // Measured 0.063 to 0.1 across browsers and rates. Easing counted per
-      // frame instead of by time lands near 0.03 to 0.045 at 120 Hz and above
-      // 0.13 at 30 Hz, outside this band.
-      expect(response).toBeGreaterThan(0.05);
-      expect(response).toBeLessThan(0.125);
+      expect(rise).toBeGreaterThan(0.07);
+      expect(rise).toBeLessThan(0.15);
       const x0 = await page.evaluate(() => window.__game.state.getCurrentState().cow.x);
       const t0 = Date.now();
       await page.waitForTimeout(800);
