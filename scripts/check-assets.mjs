@@ -2,29 +2,64 @@
 //
 // Phaser loads assets from string paths such as "src/images/BG.png", which
 // Vite never sees, and index.html loads Phaser itself with plain script tags.
-// A missing file still gets a 200 from `vite preview` and an HTML 404 page
-// from nginx, so the browser never says which file is gone. This script reads
-// every such path and checks it exists under dist/.
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+// `vite preview` answers a missing file with index.html and a 200, so a broken
+// build can look fine locally. This script reads every such path and checks
+// it exists as a file under dist/.
+//
+// What it reads:
+// - quoted or backtick "src/..." asset paths in main.js and every .js file
+//   under src/ (Phaser's own library files excepted) and in dist/index.html
+// - local src and href attributes in dist/index.html
+// - local url() references in the built stylesheets under dist/assets/
+//
+// What it cannot see: paths built at runtime, such as "src/images/" + name.
+// Write asset paths as whole string literals so this check covers them.
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { dirname, join, relative, sep } from "node:path";
 
 const DIST = "dist";
-const ASSET_LITERAL = /["'](src\/[^"']+\.(?:png|jpe?g|gif|mp3|wav|ogg|json))["']/g;
-const HTML_REFERENCE = /(?:src|href)="(?:\.\/|\/)?([^"#?:]+)"/g;
+const SKIPPED_SOURCES = new Set(["src/libs/phaser.js", "src/libs/phaser.min.js"]);
+const ASSET_EXTENSIONS = "png|jpe?g|gif|webp|svg|mp3|wav|ogg|m4a|aac|json|xml|fnt|atlas|js|css";
+
+const ASSET_LITERAL = new RegExp(`["'\`](src/[^"'\`$]+\\.(?:${ASSET_EXTENSIONS}))["'\`]`, "g");
+const HTML_REFERENCE = /(?:src|href)=["'](?![a-z]+:|\/\/|#)(?:\.\/|\/)?([^"'#?]+)[^"']*["']/g;
+const CSS_URL = /url\(\s*["']?(?!data:|https?:|\/\/)([^"')#?]+)/g;
 
 function matchesIn(text, pattern) {
   return [...text.matchAll(pattern)].map((match) => match[1]);
 }
 
+function filesUnder(dir, extension) {
+  return readdirSync(dir, { recursive: true })
+    .map((name) => join(dir, name))
+    .filter((path) => path.endsWith(extension) && statSync(path).isFile());
+}
+
 function pathsFromGameCode() {
-  return readdirSync("src")
-    .filter((name) => name.endsWith(".js"))
-    .flatMap((name) => matchesIn(readFileSync(join("src", name), "utf8"), ASSET_LITERAL));
+  const sources = ["main.js", ...filesUnder("src", ".js")].filter(
+    (path) => !SKIPPED_SOURCES.has(path.split(sep).join("/")),
+  );
+  return sources.flatMap((path) => matchesIn(readFileSync(path, "utf8"), ASSET_LITERAL));
 }
 
 function pathsFromBuiltHtml() {
   const html = readFileSync(join(DIST, "index.html"), "utf8");
-  return matchesIn(html, HTML_REFERENCE);
+  return [...matchesIn(html, HTML_REFERENCE), ...matchesIn(html, ASSET_LITERAL)];
+}
+
+function pathsFromBuiltCss() {
+  const assetsDir = join(DIST, "assets");
+  if (!existsSync(assetsDir)) return [];
+  return filesUnder(assetsDir, ".css").flatMap((cssFile) =>
+    matchesIn(readFileSync(cssFile, "utf8"), CSS_URL).map((url) =>
+      relative(DIST, join(dirname(cssFile), url)),
+    ),
+  );
+}
+
+function isFileInDist(path) {
+  const full = join(DIST, path);
+  return existsSync(full) && statSync(full).isFile();
 }
 
 if (!existsSync(join(DIST, "index.html"))) {
@@ -32,8 +67,10 @@ if (!existsSync(join(DIST, "index.html"))) {
   process.exit(1);
 }
 
-const paths = [...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml()])].sort();
-const missing = paths.filter((path) => !existsSync(join(DIST, path)));
+const paths = [
+  ...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml(), ...pathsFromBuiltCss()]),
+].sort();
+const missing = paths.filter((path) => !isFileInDist(path));
 
 if (missing.length > 0) {
   console.error(`Missing from ${DIST}/ (${missing.length} of ${paths.length}):`);
