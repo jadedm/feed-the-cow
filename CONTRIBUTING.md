@@ -9,10 +9,12 @@ For anything bigger than a small fix, open an issue first so we can agree on the
 
 ## Setup
 
-You need Node.js 18, or 20 and later, and npm. The repo commits `package-lock.json`, so use npm rather than yarn or pnpm.
+You need Node.js 20 or later, and npm. CI runs on Node 22. The repo commits `package-lock.json`, so use npm rather than yarn or pnpm.
+
+Fork the repo on GitHub, then clone your fork:
 
 ```bash
-git clone https://github.com/jadedm/feed-the-cow.git
+git clone https://github.com/<your-username>/feed-the-cow.git
 cd feed-the-cow
 npm ci
 npm run dev
@@ -38,7 +40,7 @@ npm run check:assets
 npm run preview
 ```
 
-`check:assets` fails if any image, sound or script the game loads is missing from the build. Then play the game in the preview, on a phone-sized window too if you touched controls or layout.
+`check:assets` fails if an asset path written in the game code, `index.html` or the built CSS is missing from the build. It cannot see paths assembled at runtime, such as `"src/images/" + name`, so write asset paths as whole strings. Then play the game in the preview, on a phone-sized window too if you touched controls or layout.
 
 Pull requests run the build and the asset check in CI.
 
@@ -46,11 +48,11 @@ Pull requests run the build and the asset check in CI.
 
 - Branch name: a prefix, the issue number and a short slug, for example `fix/12-cow-leaves-screen`. Prefixes: `feature`, `fix`, `docs`, `chore`, `refactor`, `ci`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/), for example `fix: stop cow leaving the top of the screen`.
-- Open the pull request against `main` and link the issue it closes.
+- Push the branch to your fork and open the pull request against `main` here, linking the issue it closes.
 
 ## Art and audio
 
-The game's images, audio and the woohoo brand are not under the MIT license (see [NOTICE.md](NOTICE.md)), so pull requests that add or change art or audio cannot be accepted under it. If you want to propose new art, open an issue first.
+The game's images, audio, screenshots and the woohoo brand are not under the MIT license (see [NOTICE.md](NOTICE.md)). Pull requests that add or change art or audio will not be merged. If you want to propose new art, open an issue to discuss it first.
 
 ## License
 

@@ -109,13 +109,16 @@ feed-the-cow/
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
 ├── scripts/            # Build helpers: asset copy and asset check
-├── .github/            # CI workflow
+├── .github/            # CI workflow, issue and PR templates
 ├── vite.config.js
 ├── jsdoc.json
 ├── Dockerfile          # Two-stage build served by nginx
 ├── docker-compose.yml
 ├── nginx.conf
-└── package.json
+├── package.json
+├── LICENSE             # MIT, for the code
+├── NOTICE.md           # Art and audio reserved, third-party licenses
+└── CONTRIBUTING.md
 ```
 
 ## API documentation
@@ -165,7 +168,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-The game's images and audio, and the woohoo name and logo, are not. They stay all rights reserved, so a fork you publish needs its own art and sound. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, both MIT).
+The game's images, audio and screenshots, and the woohoo name, logo and campaign text, are not. They stay all rights reserved, so a fork you publish needs its own art, sound and text. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
 
 ## Acknowledgments
 
