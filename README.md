@@ -1,190 +1,176 @@
-# Feed The Cow 🐄
+# Feed The Cow
 
-A fun, fast-paced browser game built with Phaser 2 for World Milk Day. Help the cow eat healthy green fodder while avoiding harmful injections!
+A browser arcade game built with Phaser 2 for World Milk Day. Steer the cow up and down to eat green fodder and avoid the injections.
 
 [![GitHub stars](https://img.shields.io/github/stars/jadedm/feed-the-cow?style=social)](https://github.com/jadedm/feed-the-cow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 📸 Screenshots
+## Screenshots
 
 <div align="center">
 
-### Title Screen
-![Title Screen](screenshots/feed-the-cow-3.png)
+### Title screen
+![Title screen](screenshots/feed-the-cow-3.png)
 
 ### Gameplay
 ![Gameplay](screenshots/feed-the-cow-2.png)
 
-### Game Over
-![Game Over](screenshots/feed-the-cow-1.png)
+### Game over
+![Game over](screenshots/feed-the-cow-1.png)
 
 </div>
 
-## 📖 About
+## About
 
-"Feed The Cow" was created to raise awareness about the importance of natural feed for cattle. In India, there's an alarming gap between the demand and supply of feed & fodder. Most cows are on a diet of man-made concentrates which increases milk production but has long-lasting negative impacts on their health, making medications and injections a necessity.
+The game was made to draw attention to what cattle eat. In India there is a large gap between the demand for feed and fodder and the supply. Many cows live on man-made concentrates, which raise milk output but harm the animal's health over time, so medicines and injections become routine.
 
-This game illustrates the importance of feeding cows natural, fresh green fodder to keep them healthy!
+The game makes the point directly: fresh green fodder keeps the cow going, and injections end the run.
 
-## ✨ Features
+## Features
 
-- **Progressive Difficulty**: Game speed increases infinitely using smooth square root scaling
-- **Matrix Swarm Mode**: Massive injection waves appear after 50 seconds
-- **Multiple Control Options**:
-  - Mouse/Touch drag controls
-  - Keyboard arrow keys (↑/↓)
-  - Virtual joystick for mobile devices
-- **Responsive Design**: Works on desktop and mobile browsers
-- **Sound Effects**: Immersive audio feedback
-- **Score Tracking**: Keep track of how much grass you've collected
+- The background scrolls faster the longer you survive, following a square-root curve.
+- Injection count climbs from 2 to 23 over the first 50 seconds.
+- Three ways to control the cow: drag with mouse or touch, arrow keys, or an on-screen joystick.
+- Runs in desktop and mobile browsers. The 960x540 canvas scales down to fit smaller screens, to a minimum of 480x260.
+- Sound effects and background music.
 
-## 🕹️ Controls
+## Controls
 
-| Input                | Action                                  |
-| -------------------- | --------------------------------------- |
-| **Mouse/Touch**      | Click and drag the cow vertically       |
-| **Arrow Keys**       | ↑ Move up, ↓ Move down                  |
-| **Virtual Joystick** | Touch and drag on mobile (bottom right) |
+| Input | Action |
+| --- | --- |
+| Mouse or touch | Drag the cow up or down |
+| Arrow keys | Up and down move the cow |
+| On-screen joystick | Touch or click and drag, bottom right of the screen |
 
-## 🎯 How to Play
+## How to play
 
-1. Move the cow up and down to collect **green grass** (good!)
-2. Avoid the **injections** (bad!)
-3. Each grass collected gives you **10 points**
-4. Game speed increases as time progresses
-5. More injections spawn over time - survive as long as you can!
-6. One hit from an injection ends the game
+1. Move the cow up and down to eat the green fodder.
+2. Each piece of fodder scores 10 points.
+3. Avoid the injections. One hit ends the game.
+4. The background speeds up and more injections appear over time. Survive as long as you can.
 
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js 18, or 20 and later (the range Vite 5 supports)
+- npm. The repo commits `package-lock.json`, and the Dockerfile runs `npm ci`, so use npm rather than yarn or pnpm.
 
-### Installation
+### Run locally
 
 ```bash
-# Clone the repository
-git clone git@github.com:jadedm/feed-the-cow.git
-
-# Navigate to project directory
+git clone https://github.com/jadedm/feed-the-cow.git
 cd feed-the-cow
-
-# Install dependencies
-npm install
-
-# Start development server
+npm ci
 npm run dev
 ```
 
-The game will be available at `http://localhost:8000`
+The dev server opens the game at `http://localhost:8000`.
 
-### Build for Production
+### Production build
+
+Phaser loads images and sounds at runtime from paths such as `src/images/BG.png`. Vite cannot see those paths, so `vite build` does not copy the assets. Copy `src/` into `dist/` yourself after building:
 
 ```bash
-# Create optimized production build
 npm run build
-
-# Preview production build
+cp -r src dist/
 npm run preview
 ```
 
-## 🛠️ Tech Stack
+`npm run deploy` does the build and the copy, then publishes `dist/` to the `gh-pages` branch.
 
-- **Game Engine**: [Phaser 2](https://phaser.io/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
-- **Language**: JavaScript (ES6)
-- **Plugin**: [Phaser Virtual Gamepad](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad)
+The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
 
-## 📂 Project Structure
+The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
+
+## Tech stack
+
+- Game engine: [Phaser 2](https://phaser.io/). This is Phaser 2, not Phaser 3; the APIs differ.
+- Build tool: [Vite](https://vitejs.dev/)
+- Language: JavaScript (ES modules)
+- On-screen joystick: [Phaser Virtual Gamepad](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad), patched to run with a joystick and no button
+
+## Project structure
 
 ```
-feedthecow/
+feed-the-cow/
 ├── src/
 │   ├── audio/          # Sound effects and music
 │   ├── css/            # Stylesheets
-│   ├── images/         # Game sprites and assets
-│   ├── libs/           # Third-party libraries
-│   │   └── plugins/    # Phaser plugins
-│   ├── Boot.js         # Initial game setup
+│   ├── images/         # Sprites and backgrounds
+│   ├── libs/           # Phaser and plugins, loaded as plain scripts
+│   ├── Boot.js         # Canvas and scaling setup
 │   ├── Preloader.js    # Asset loading
 │   ├── StartMenu.js    # Title screen
-│   └── Game.js         # Main game logic
+│   └── Game.js         # Gameplay and tuning constants
+├── screenshots/        # Images used in this README
 ├── index.html
-├── main.js             # Entry point
-├── vite.config.js      # Vite configuration
-├── jsdoc.json          # JSDoc configuration
+├── main.js             # Creates the Phaser game and registers the states
+├── vite.config.js
+├── jsdoc.json
+├── Dockerfile          # Two-stage build served by nginx (see Production build)
+├── docker-compose.yml
+├── nginx.conf
 └── package.json
 ```
 
-## 📚 Documentation
-
-Generate API documentation using JSDoc:
+## API documentation
 
 ```bash
 npm run docs
 ```
 
-Documentation will be generated in the `docs/` folder. Open `docs/index.html` to view.
+This writes JSDoc output to `docs/`. Open `docs/index.html` to read it.
 
-## 🎨 Game Mechanics
+## Game mechanics
 
-### Difficulty Progression
+### Speed
 
-- **Background Scroll Speed**: Increases using `speed = 3 + √(seconds) × 0.5`
-  - At 0s: 3 px/frame
-  - At 16s: ~5 px/frame
-  - At 36s: ~6 px/frame
-  - At 64s: ~7 px/frame
-  - Continues increasing infinitely
+Background scroll speed is `3 + √(seconds) × 0.5` pixels per frame:
 
-### Injection Spawning Timeline
+| Time | Speed (px/frame) |
+| --- | --- |
+| 0s | 3 |
+| 16s | 5 |
+| 36s | 6 |
+| 64s | 7 |
 
-| Time (seconds) | Injections Added | Total Injections   |
-| -------------- | ---------------- | ------------------ |
-| 0s             | 2                | 2                  |
-| 10s            | +1               | 3                  |
-| 20s            | +2               | 5                  |
-| 30s            | +2               | 7                  |
-| 40s            | +3               | 10                 |
-| 45s            | +5               | 15                 |
-| 50s            | +8               | 23 (Matrix Swarm!) |
+Only the background speeds up, with no upper limit. Fodder and injections move at fixed speed ranges set in `src/Game.js`.
 
-### Scoring
+### Injection spawning
 
-- Grass collected: **+10 points**
-- Hit by injection: **Game Over**
+| Time | Injections added | Total |
+| --- | --- | --- |
+| 0s | 2 | 2 |
+| 10s | 1 | 3 |
+| 20s | 2 | 5 |
+| 30s | 2 | 7 |
+| 40s | 3 | 10 |
+| 45s | 5 | 15 |
+| 50s | 8 | 23 |
 
-## 🤝 Contributing
+These values live as named constants near the top of `src/Game.js`. Change them there to rebalance the game.
 
-Contributions are welcome! Feel free to:
+## Contributing
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issues). Questions and open-ended discussion go in [Discussions](https://github.com/jadedm/feed-the-cow/discussions).
 
-## 📜 License
+To send a change:
 
-This project is open source and available under the [MIT License](LICENSE).
+1. Fork the repo and create a branch, for example `feature/12-touch-sensitivity` (a prefix, the issue number and a short slug).
+2. Use conventional commit messages, for example `fix: stop cow leaving the top of the screen`.
+3. There is no automated test suite. Build, copy assets and run `npm run preview`, then play the game to check your change.
+4. Open a pull request against `main` and link the issue.
 
-## 🙏 Acknowledgments
+## License
 
-- Created for **World Milk Day**
-- Powered by **Phaser 2** game framework
-- Virtual gamepad by [Shawn Hymel](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad)
-- Inspired by the mission to promote natural, healthy feed for cattle
+A license file has not been added yet. Until it is, the code carries no open source license. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
 
----
+## Acknowledgments
 
-**Made with ❤️ for healthier cows and sustainable dairy farming**
-
-🌾 Feed them good, keep them healthy! 🐄
+- Made for World Milk Day.
+- Built on the Phaser 2 game framework.
+- Virtual gamepad plugin by [Shawn Hymel](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad).
 
 ---
 
-**Built by [Manish Jadhav](https://manishj.com)**, engineer & technical consultant.
-
-Need something like this designed or built? [Inoltro](https://inoltro.ai) is my studio.
+Built by [Manish Jadhav](https://manishj.com). Need something like this designed or built? [Inoltro](https://inoltro.ai) is my studio.
