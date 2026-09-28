@@ -204,7 +204,7 @@ window.feedTheCow.Game.prototype = {
    * Uses square root scaling for smooth continuous increase
    * Prevents game from becoming instantly impossible
    * Speed progression: 0s: 3, 16s: ~5, 36s: ~6, 64s: ~7, 100s: ~8
-   * @returns {number} Current scroll speed in pixels per frame
+   * @returns {number} Current scroll speed in pixels per logic step (60 a second)
    */
   getScrollSpeed: function () {
     var baseSpeed = window.feedTheCow.Game.SCROLL_SPEED_BASE;
