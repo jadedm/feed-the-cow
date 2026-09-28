@@ -28,4 +28,4 @@ You may not reuse, redistribute or modify them outside this repository without p
 | bundled inside `phaser.js` | gl-matrix, Copyright 2013 Brandon Jones and Colin MacKenzie IV | BSD 2-clause style |
 | `src/libs/plugins/phaser-plugin-virtual-gamepad.js`, `src/images/gamepad_spritesheet.png` | Phaser Virtual Gamepad, Copyright 2016 Shawn Hymel, joystick math based on work by Eugenio Fage | MIT |
 
-The full license text for each is kept in the header of the file that contains it. The plugin in this repo is patched to run with a joystick and no button.
+The full license text for each is kept in the header of `src/libs/phaser.js`. The game ships the minified `src/libs/phaser.min.js`, which strips those headers, so `src/libs/THIRD-PARTY-LICENSES.txt` reproduces them and is published next to it. The plugin in this repo is patched to run with a joystick and no button.
