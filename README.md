@@ -142,7 +142,7 @@ Background scroll speed is `3 + √(seconds) × 0.5` pixels per game step. The g
 | 36s | 6 | 360 |
 | 64s | 7 | 420 |
 
-The speed has no upper limit. Fodder and injections move at the ground's speed plus their own, so they keep coming at the cow faster than the background as it accelerates: fodder 120 px/s over the ground, injections 245 px/s. Every item of a kind moves at the same speed, so two grass or two injections never run into each other, and each spawns in a clear spot. The speeds are constants near the top of `src/Game.js`.
+The speed has no upper limit. Fodder and injections move at the ground's speed plus their own, so they keep coming at the cow faster than the background as it accelerates: fodder 120 px/s over the ground, injections 245 px/s. Every item of a kind moves at the same speed, so two pieces of fodder or two injections never run into each other, and each spawns in a clear spot. The speeds are constants near the top of `src/Game.js`.
 
 ### Injection spawning
 

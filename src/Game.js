@@ -265,6 +265,7 @@ window.feedTheCow.Game.prototype = {
   /**
    * Moves grass and injections at the ground's current speed plus their kind's,
    * and respawns any that have scrolled fully past the left edge.
+   * Respawn comes first because reset() zeroes the velocity.
    * Items spawn off-screen to the right, so Phaser's checkWorldBounds cannot
    * be used here: it fires for any sprite outside the world, including ones
    * still on their way in, and reset() re-arms it every frame.
@@ -273,12 +274,12 @@ window.feedTheCow.Game.prototype = {
     var ground = this.getScrollSpeed() * this.time.desiredFps;
 
     this.grassGroup.forEachAlive(function (g) {
-      g.body.velocity.x = -(ground + window.feedTheCow.Game.GRASS_SPEED);
       if (g.x + g.width < 0) this.respawnGrass(g);
+      g.body.velocity.x = -(ground + window.feedTheCow.Game.GRASS_SPEED);
     }, this);
     this.injectionGroup.forEachAlive(function (j) {
-      j.body.velocity.x = -(ground + window.feedTheCow.Game.INJECTION_SPEED);
       if (j.x + j.width < 0) this.respawnInjection(j);
+      j.body.velocity.x = -(ground + window.feedTheCow.Game.INJECTION_SPEED);
     }, this);
   },
 
