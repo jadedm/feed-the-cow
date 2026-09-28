@@ -1,6 +1,6 @@
 import { drag, expect, openGame, simulateDisplayHz, startGameDirectly, test } from "./helpers.js";
 
-const TOP_SPEED = 300;
+const TOP_SPEED = 450;
 
 // Starts a game with nothing that can end it: no injections, no timer.
 async function quietGame(page) {
@@ -10,7 +10,7 @@ async function quietGame(page) {
     const state = window.__game.state.getCurrentState();
     state.timer.pause();
     state.injectionGroup.forEachAlive((j) => j.kill());
-    state.cow.x = 400;
+    state.cow.x = 200;
     state.cow.y = 220;
   });
 }
@@ -34,13 +34,14 @@ async function trackCow(page, action) {
   });
 }
 
-// Highest speed between consecutive samples at least 30 ms apart, in px/s.
+// Highest speed between samples at least 100 ms apart, in px/s. Shorter
+// windows pick up frame-timing jitter rather than real speed.
 function peakSpeed(track) {
   let peak = 0;
   let last = track[0];
   for (const point of track.slice(1)) {
     const dt = (point.t - last.t) / 1000;
-    if (dt < 0.03) continue;
+    if (dt < 0.1) continue;
     const speed = Math.hypot(point.x - last.x, point.y - last.y) / dt;
     peak = Math.max(peak, speed);
     last = point;
@@ -117,34 +118,64 @@ test.describe("keys", () => {
     const later = await page.evaluate(() => window.__game.state.getCurrentState().cow.body.velocity.x);
     await page.keyboard.up("ArrowRight");
     expect(early).toBeGreaterThan(0);
-    expect(early).toBeLessThan(TOP_SPEED * 0.6);
+    expect(early).toBeLessThan(TOP_SPEED * 0.9);
     expect(later).toBeGreaterThan(TOP_SPEED * 0.95);
   });
 
-  test("held against each edge, the whole cow stays in the field", async ({ page, isMobile }) => {
+  test("released keys ease the cow to a stop, not an instant halt", async ({ page, isMobile }) => {
     test.skip(isMobile, "no keyboard on the phone profile");
     await quietGame(page);
-    const extremes = { minX: Infinity, minY: Infinity, maxRight: -Infinity, maxBottom: -Infinity };
-    for (const keys of [["ArrowUp", "ArrowLeft"], ["ArrowDown", "ArrowRight"]]) {
-      for (const key of keys) await page.keyboard.down(key);
-      await page.waitForTimeout(2500);
+    await page.keyboard.down("ArrowRight");
+    await page.waitForTimeout(500);
+    await page.evaluate(() => {
+      window.__afterRelease = [];
+      window.__sampling = true;
+      const sample = () => {
+        window.__afterRelease.push(window.__game.state.getCurrentState().cow.body.velocity.x);
+        if (window.__sampling) requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+    await page.keyboard.up("ArrowRight");
+    await page.waitForTimeout(600);
+    const speeds = await page.evaluate(() => {
+      window.__sampling = false;
+      return window.__afterRelease;
+    });
+    const firstFall = speeds.findIndex((v, i) => i > 0 && v < speeds[i - 1] - 1);
+    expect(firstFall).toBeGreaterThan(0);
+    expect(speeds[firstFall]).toBeGreaterThan(TOP_SPEED * 0.3);
+    expect(speeds[speeds.length - 1]).toBeLessThan(TOP_SPEED * 0.05);
+  });
+
+  test("the whole cow stays in its part of the field against every edge", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no keyboard on the phone profile");
+    await quietGame(page);
+    const seen = { minX: Infinity, minY: Infinity, maxRight: -Infinity, maxBottom: -Infinity };
+    for (const key of ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"]) {
+      await page.keyboard.down(key);
+      await page.waitForTimeout(1800);
       const box = await page.evaluate(() => {
         const cow = window.__game.state.getCurrentState().cow;
         return { x: cow.x, y: cow.y, right: cow.x + cow.width, bottom: cow.y + cow.height };
       });
-      for (const key of keys) await page.keyboard.up(key);
-      extremes.minX = Math.min(extremes.minX, box.x);
-      extremes.minY = Math.min(extremes.minY, box.y);
-      extremes.maxRight = Math.max(extremes.maxRight, box.right);
-      extremes.maxBottom = Math.max(extremes.maxBottom, box.bottom);
+      await page.keyboard.up(key);
+      seen.minX = Math.min(seen.minX, box.x);
+      seen.minY = Math.min(seen.minY, box.y);
+      seen.maxRight = Math.max(seen.maxRight, box.right);
+      seen.maxBottom = Math.max(seen.maxBottom, box.bottom);
     }
-    expect(extremes.minX).toBeGreaterThanOrEqual(0);
-    expect(extremes.minY).toBeGreaterThanOrEqual(0);
-    expect(extremes.maxRight).toBeLessThanOrEqual(960);
-    expect(extremes.maxBottom).toBeLessThanOrEqual(540);
-    // And it reaches the corners, so the bounds are not simply too small.
-    expect(extremes.minX).toBeLessThan(2);
-    expect(extremes.maxBottom).toBeGreaterThan(538);
+    // Inside the field, and the cow's right edge stops at 720 so injections
+    // entering at 960 can be seen coming.
+    expect(seen.minX).toBeGreaterThanOrEqual(0);
+    expect(seen.minY).toBeGreaterThanOrEqual(0);
+    expect(seen.maxRight).toBeLessThanOrEqual(720);
+    expect(seen.maxBottom).toBeLessThanOrEqual(540);
+    // And it reaches each limit, so the bounds are not simply too small.
+    expect(seen.minX).toBeLessThan(2);
+    expect(seen.minY).toBeLessThan(2);
+    expect(seen.maxRight).toBeGreaterThan(718);
+    expect(seen.maxBottom).toBeGreaterThan(538);
   });
 });
 
@@ -156,6 +187,19 @@ test.describe("joystick", () => {
     const after = await cowPosition(page);
     expect(after.x - before.x).toBeGreaterThan(40);
     expect(before.y - after.y).toBeGreaterThan(40);
+  });
+
+  test("the joystick is never covered by the cow", async ({ page }) => {
+    await quietGame(page);
+    const reach = await page.evaluate(async () => {
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const state = window.__game.state.getCurrentState();
+      state.cow.x = 900;
+      state.cow.y = 500;
+      await sleep(200);
+      return { right: state.cow.x + state.cow.width, joystickLeft: 860 - 50 };
+    });
+    expect(reach.right).toBeLessThanOrEqual(reach.joystickLeft);
   });
 });
 
@@ -183,22 +227,26 @@ test.describe("drag", () => {
     const pressedAt = track[0].t;
     const arrived = track.find((p) => p.y >= 430);
     expect(arrived, "cow reached the bottom").toBeTruthy();
-    // 440 px at 300 px/s is 1.47 s; allow for the drag gesture itself.
-    expect((arrived.t - pressedAt) / 1000).toBeGreaterThan(1.3);
+    // 440 px at 450 px/s is 0.98 s before any easing in or out.
+    expect((arrived.t - pressedAt) / 1000).toBeGreaterThan(0.9);
     expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.08);
   });
 
   test("the cow eases to a stop on the drag point without overshooting", async ({ page, isMobile }) => {
     await quietGame(page);
     const start = await cowPosition(page);
-    const target = { x: start.x, y: start.y - 200 };
+    // Diagonal, so the horizontal grab offset is checked as well as the vertical.
+    const target = { x: start.x + 150, y: start.y - 150 };
     const track = await trackCow(page, () =>
-      drag(page, isMobile, [start.x + 80, start.y + 45], [target.x + 80, target.y + 45], { holdMs: 2000 })
+      drag(page, isMobile, [start.x + 80, start.y + 45], [target.x + 80, target.y + 45], { holdMs: 3000 })
     );
     const final = track[track.length - 1];
-    const overshoot = Math.max(0, ...track.map((p) => target.y - p.y));
+    const overshootY = Math.max(0, ...track.map((p) => target.y - p.y));
+    const overshootX = Math.max(0, ...track.map((p) => p.x - target.x));
     expect(Math.abs(final.y - target.y)).toBeLessThan(3);
-    expect(overshoot).toBeLessThan(2);
+    expect(Math.abs(final.x - target.x)).toBeLessThan(3);
+    expect(overshootY).toBeLessThan(2);
+    expect(overshootX).toBeLessThan(2);
     // Slowing down near the point: the last 60 px take longer than 60 px at top speed.
     const at60 = track.find((p) => p.y <= target.y + 60);
     const at5 = track.find((p) => p.y <= target.y + 5);
@@ -208,7 +256,7 @@ test.describe("drag", () => {
 
 test.describe("same feel on any display rate", () => {
   for (const hz of [30, 60, 120]) {
-    test(`${hz} Hz: same acceleration and top speed ${TOP_SPEED} px/s`, async ({ page, isMobile }) => {
+    test(`${hz} Hz: same easing and top speed ${TOP_SPEED} px/s`, async ({ page, isMobile }) => {
       test.skip(isMobile, "keyboard");
       await simulateDisplayHz(page, hz);
       await quietGame(page);
@@ -216,17 +264,37 @@ test.describe("same feel on any display rate", () => {
         const cow = window.__game.state.getCurrentState().cow;
         cow.x = 0;
       });
+      // Time from the key press to 63% of top speed, from page timestamps so
+      // test-runner timing does not matter. The easing's response time is
+      // 0.08 s, plus up to one frame before the game sees the key (33 ms at
+      // 30 Hz). Easing counted per frame instead of by time would take about
+      // 0.16 s at 30 Hz and 0.04 s at 120 Hz.
+      await page.evaluate(() => {
+        window.__pressedAt = null;
+        window.__speeds = [];
+        window.__sampling = true;
+        window.addEventListener("keydown", () => {
+          window.__pressedAt = window.__pressedAt || performance.now();
+        });
+        const sample = () => {
+          const body = window.__game.state.getCurrentState().cow.body;
+          window.__speeds.push({ t: performance.now(), v: body.velocity.x });
+          if (window.__sampling) requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      });
       await page.keyboard.down("ArrowRight");
-      await page.waitForTimeout(150);
-      // 1400 px/s² for 150 ms is 210 px/s; timer jitter and a frame of input
-      // delay move it either way. Acceleration counted per frame instead of
-      // by time gives about 105 at 30 Hz and 300 at 120 Hz, outside this band.
-      const accelerating = await page.evaluate(
-        () => window.__game.state.getCurrentState().cow.body.velocity.x
-      );
-      expect(accelerating).toBeGreaterThan(150);
-      expect(accelerating).toBeLessThan(285);
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(400);
+      const response = await page.evaluate((top) => {
+        window.__sampling = false;
+        const reached = window.__speeds.find((s) => s.v >= top * 0.632);
+        return reached ? (reached.t - window.__pressedAt) / 1000 : null;
+      }, TOP_SPEED);
+      // Measured 0.063 to 0.1 across browsers and rates. Easing counted per
+      // frame instead of by time lands near 0.03 to 0.045 at 120 Hz and above
+      // 0.13 at 30 Hz, outside this band.
+      expect(response).toBeGreaterThan(0.05);
+      expect(response).toBeLessThan(0.125);
       const x0 = await page.evaluate(() => window.__game.state.getCurrentState().cow.x);
       const t0 = Date.now();
       await page.waitForTimeout(800);
@@ -241,7 +309,7 @@ test.describe("same feel on any display rate", () => {
 });
 
 test.describe("collisions from anywhere", () => {
-  for (const [x, y] of [[0, 0], [800, 0], [0, 440], [800, 440], [400, 220]]) {
+  for (const [x, y] of [[0, 0], [560, 0], [0, 440], [560, 440], [300, 220]]) {
     test(`cow at ${x},${y}: grass scores, an injection ends the game`, async ({ page }) => {
       await quietGame(page);
       const result = await page.evaluate(
@@ -251,7 +319,11 @@ test.describe("collisions from anywhere", () => {
           state.cow.x = cx;
           state.cow.y = cy;
           await sleep(100);
-          state.grassGroup.getFirstAlive().reset(state.cow.x + 70, state.cow.y + 25);
+          // Only the placed grass: others arriving from the right would add score.
+          state.grassGroup.forEachAlive((g) => g.kill());
+          const grass = state.grassGroup.getFirstDead();
+          grass.revive();
+          grass.reset(state.cow.x + 70, state.cow.y + 25);
           await sleep(150);
           const score = state.score;
           const injection = state.injectionGroup.getFirstDead();

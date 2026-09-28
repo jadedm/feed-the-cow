@@ -114,19 +114,21 @@ window.feedTheCow.Game.GROUND_SPEED_SCALE = 60;
 /**
  * The cow's top speed in pixels per second, in any direction
  */
-window.feedTheCow.Game.COW_TOP_SPEED = 300;
+window.feedTheCow.Game.COW_TOP_SPEED = 450;
 
 /**
- * How fast the cow speeds up and slows down, in pixels per second per second.
- * At 1400 it reaches top speed in about 0.2 s, so no input moves it instantly.
+ * How quickly the cow's speed eases toward what the player asks for, in
+ * seconds: after this long it has closed about 63% of the gap, after three
+ * times this about 95%. Smaller is snappier; it never jumps in one frame.
  */
-window.feedTheCow.Game.COW_ACCELERATION = 1400;
+window.feedTheCow.Game.COW_RESPONSE_TIME = 0.08;
 
 /**
- * When dragged, the cow slows down over this many pixels before reaching the
- * point it is being dragged to, instead of stopping dead.
+ * The cow's right edge stops here, not at the edge of the field. Injections
+ * appear at x = 960 moving about 425 px/s, so this leaves about half a
+ * second to see one coming, and keeps the cow clear of the joystick.
  */
-window.feedTheCow.Game.COW_EASE_DISTANCE = 120;
+window.feedTheCow.Game.COW_FIELD_RIGHT = 720;
 
 /**
  * Frames per second of the cow's run animation (8 frames in cow-run.png)
@@ -289,7 +291,8 @@ window.feedTheCow.Game.prototype = {
   /**
    * World-bounds collision works on the collision box, which is smaller than
    * the drawing, so legs and horns could leave the field. Shrink the physics
-   * bounds by the box's margins inside the sprite so the whole sprite stays in.
+   * bounds by the box's margins inside the sprite so the whole sprite stays in,
+   * and stop at COW_FIELD_RIGHT on the right.
    */
   keepWholeCowInField: function () {
     var body = this.cow.body;
@@ -297,10 +300,11 @@ window.feedTheCow.Game.prototype = {
     var top = body.offset.y;
     var right = this.cow.width - body.offset.x - body.width;
     var bottom = this.cow.height - body.offset.y - body.height;
+    var fieldRight = window.feedTheCow.Game.COW_FIELD_RIGHT;
     this.physics.arcade.setBounds(
       left,
       top,
-      this.world.width - left - right,
+      fieldRight - left - right,
       this.world.height - top - bottom
     );
   },
@@ -312,8 +316,9 @@ window.feedTheCow.Game.prototype = {
    * @param {Phaser.Pointer} pointer - The pointer that pressed it
    */
   startDrag: function (cow, pointer) {
+    if (this.joystick.properties.inUse) return;
     this.dragPointer = pointer;
-    this.dragGrab = { x: pointer.x - cow.x, y: pointer.y - cow.y };
+    this.dragGrab = { x: pointer.worldX - cow.x, y: pointer.worldY - cow.y };
   },
 
   /**
@@ -328,34 +333,35 @@ window.feedTheCow.Game.prototype = {
 
   /**
    * The velocity the player is asking for, in pixels per second, capped at
-   * COW_TOP_SPEED. A drag wins over the joystick, which wins over the keys.
+   * COW_TOP_SPEED. The joystick wins over a drag, which wins over the keys.
    * @returns {{x: number, y: number}}
    */
   desiredCowVelocity: function () {
     var top = window.feedTheCow.Game.COW_TOP_SPEED;
-    if (this.dragPointer) return this.dragVelocity(top);
-    if (this.joystick.properties.inUse) {
-      var stick = this.joystick.properties;
-      var fromStick = { x: (stick.x / 100) * top, y: (stick.y / 100) * top };
-      return this.capSpeed(fromStick, top);
+    var stick = this.joystick.properties;
+    if (stick.inUse) {
+      return { x: (stick.x / 100) * top, y: (stick.y / 100) * top };
     }
+    if (this.dragPointer) return this.dragVelocity(top);
     return this.keyVelocity(top);
   },
 
   /**
-   * Toward the drag point at top speed, slowing linearly over the last
-   * COW_EASE_DISTANCE pixels so the cow settles on the point.
+   * Toward the drag point, at a speed proportional to the distance left and
+   * capped at top speed, so the cow slows as it arrives. The proportion is
+   * 1 / (4 x COW_RESPONSE_TIME): with the eased velocity in moveCow, that is
+   * critically damped, so the cow settles on the point without overshooting.
    * @param {number} top - Top speed in pixels per second
    * @returns {{x: number, y: number}}
    */
   dragVelocity: function (top) {
-    var dx = this.dragPointer.x - this.dragGrab.x - this.cow.x;
-    var dy = this.dragPointer.y - this.dragGrab.y - this.cow.y;
+    var dx = this.dragPointer.worldX - this.dragGrab.x - this.cow.x;
+    var dy = this.dragPointer.worldY - this.dragGrab.y - this.cow.y;
     var distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < 1) return { x: 0, y: 0 };
+    if (distance < 0.5) return { x: 0, y: 0 };
 
-    var ease = Math.min(1, distance / window.feedTheCow.Game.COW_EASE_DISTANCE);
-    var speed = top * ease;
+    var perSecond = 1 / (4 * window.feedTheCow.Game.COW_RESPONSE_TIME);
+    var speed = Math.min(top, distance * perSecond);
     return { x: (dx / distance) * speed, y: (dy / distance) * speed };
   },
 
@@ -378,33 +384,19 @@ window.feedTheCow.Game.prototype = {
   },
 
   /**
-   * Scales a velocity down to at most `top` pixels per second.
-   * @param {{x: number, y: number}} velocity
-   * @param {number} top
-   * @returns {{x: number, y: number}}
-   */
-  capSpeed: function (velocity, top) {
-    var speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-    if (speed <= top) return velocity;
-    return { x: (velocity.x / speed) * top, y: (velocity.y / speed) * top };
-  },
-
-  /**
-   * Moves the cow's velocity toward what the player asks for, by at most
-   * COW_ACCELERATION per second, so it speeds up and slows down smoothly.
-   * Uses the frame time, so it behaves the same at any display rate.
+   * Eases the cow's velocity toward what the player asks for: each frame it
+   * closes the share of the gap that COW_RESPONSE_TIME allows for that frame's
+   * length, so it speeds up and slows down smoothly and behaves the same at
+   * any display rate.
    */
   moveCow: function () {
     var desired = this.desiredCowVelocity();
     var velocity = this.cow.body.velocity;
-    var maxChange =
-      (window.feedTheCow.Game.COW_ACCELERATION * this.time.delta) / 1000;
-    var step = function (current, target) {
-      var change = Math.max(-maxChange, Math.min(maxChange, target - current));
-      return current + change;
-    };
-    velocity.x = step(velocity.x, desired.x);
-    velocity.y = step(velocity.y, desired.y);
+    var seconds = this.time.delta / 1000;
+    var response = window.feedTheCow.Game.COW_RESPONSE_TIME;
+    var share = 1 - Math.exp(-seconds / response);
+    velocity.x += (desired.x - velocity.x) * share;
+    velocity.y += (desired.y - velocity.y) * share;
   },
 
   /**
@@ -689,7 +681,8 @@ window.feedTheCow.Game.prototype = {
       this.ouch = null;
     }
 
-    // input.onUp is a game-level signal: without this, each run adds one.
+    // The state change also resets input signals; removing it here keeps
+    // shutdown's cleanup complete on its own.
     this.input.onUp.remove(this.endDrag, this);
     this.dragPointer = null;
     this.dragGrab = null;

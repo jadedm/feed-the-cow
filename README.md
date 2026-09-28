@@ -29,7 +29,7 @@ The game makes the point directly: fresh green fodder keeps the cow going, and i
 
 - The background scrolls faster the longer you survive, following a square-root curve.
 - Injection count climbs from 2 to 23 over the first 50 seconds.
-- Steer the cow anywhere in the field with mouse or touch drag, arrow keys or WASD, or an on-screen joystick. The cow speeds up and slows down smoothly and has a top speed, so it cannot cross the field in an instant.
+- Steer the cow around the left three quarters of the field (the rest is where injections come in) with mouse or touch drag, arrow keys or WASD, or an on-screen joystick. The cow eases in and out of every move and has a top speed of 450 px/s, so it cannot cross the field in an instant.
 - Runs in desktop and mobile browsers. The 960x540 canvas scales down to fit smaller screens, to a minimum of 480x260.
 - Sound effects and background music.
 
