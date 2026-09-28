@@ -18,7 +18,6 @@ window.feedTheCow.Game = function (game) {
   this.timer = null;
   this.music = null;
   this.ouch = null;
-  this.ding = null;
   this.score = 0;
   this.scoreText = null;
   this.lastInjectionSpawnTime = 0;
@@ -70,42 +69,42 @@ window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION = 500;
 /**
  * Minimum velocity for grass (initial spawn)
  */
-window.feedTheCow.Game.GRASS_VELOCITY_MIN = -150;
+window.feedTheCow.Game.GRASS_VELOCITY_MIN = -200;
 
 /**
  * Maximum velocity for grass (initial spawn)
  */
-window.feedTheCow.Game.GRASS_VELOCITY_MAX = -200;
+window.feedTheCow.Game.GRASS_VELOCITY_MAX = -150;
 
 /**
  * Minimum velocity for grass (respawn)
  */
-window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MIN = -200;
+window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MIN = -400;
 
 /**
  * Maximum velocity for grass (respawn)
  */
-window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MAX = -400;
+window.feedTheCow.Game.GRASS_RESPAWN_VELOCITY_MAX = -200;
 
 /**
  * Minimum velocity for injections (initial spawn)
  */
-window.feedTheCow.Game.INJECTION_VELOCITY_MIN = -200;
+window.feedTheCow.Game.INJECTION_VELOCITY_MIN = -250;
 
 /**
  * Maximum velocity for injections (initial spawn)
  */
-window.feedTheCow.Game.INJECTION_VELOCITY_MAX = -250;
+window.feedTheCow.Game.INJECTION_VELOCITY_MAX = -200;
 
 /**
  * Minimum velocity for injections (respawn)
  */
-window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MIN = -400;
+window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MIN = -450;
 
 /**
  * Maximum velocity for injections (respawn)
  */
-window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MAX = -450;
+window.feedTheCow.Game.INJECTION_RESPAWN_VELOCITY_MAX = -400;
 
 /**
  * Base scroll speed for background
@@ -154,13 +153,12 @@ window.feedTheCow.Game.prototype = {
     this.music = this.add.audio("game_audio");
     this.music.play("", 0, 0.3, true);
     this.ouch = this.add.audio("hurt");
-    this.ding = this.add.audio("select_audio");
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
     this.buildWorld();
 
-    this.scoreText = this.add.text(15, 15, "score: 0", {
+    this.scoreText = this.add.text(15, 15, "score: " + this.score, {
       fontSize: "28px",
       fill: "#000",
       font: "Quicksand",
@@ -218,13 +216,10 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(j, Phaser.Physics.ARCADE);
-      j.enableBody = true;
       j.body.velocity.x = this.rnd.integerInRange(
         window.feedTheCow.Game.INJECTION_VELOCITY_MIN,
         window.feedTheCow.Game.INJECTION_VELOCITY_MAX
       );
-      j.checkWorldBounds = true;
-      j.events.onOutOfBounds.add(this.resetInjection, this);
 
       this.totalInjection++;
     }
@@ -291,24 +286,26 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(g, Phaser.Physics.ARCADE);
-      g.enableBody = true;
       g.body.velocity.x = this.rnd.integerInRange(
         window.feedTheCow.Game.GRASS_VELOCITY_MIN,
         window.feedTheCow.Game.GRASS_VELOCITY_MAX
       );
-      g.checkWorldBounds = true;
-      g.events.onOutOfBounds.add(this.resetGrass, this);
     }
   },
 
   /**
-   * Handles grass going out of bounds
-   * @param {Phaser.Sprite} g - The grass sprite that went out of bounds
+   * Respawns grass and injections that have scrolled fully past the left edge.
+   * Items spawn off-screen to the right, so Phaser's checkWorldBounds cannot
+   * be used here: it fires for any sprite outside the world, including ones
+   * still on their way in, and reset() re-arms it every frame.
    */
-  resetGrass: function (g) {
-    if (g.y > 0) {
-      this.respawnGrass(g);
-    }
+  recycleOffscreen: function () {
+    this.grassGroup.forEachAlive(function (g) {
+      if (g.x + g.width < 0) this.respawnGrass(g);
+    }, this);
+    this.injectionGroup.forEachAlive(function (j) {
+      if (j.x + j.width < 0) this.respawnInjection(j);
+    }, this);
   },
 
   /**
@@ -355,23 +352,10 @@ window.feedTheCow.Game.prototype = {
         ""
       );
       this.physics.enable(j, Phaser.Physics.ARCADE);
-      j.enableBody = true;
       j.body.velocity.x = this.rnd.integerInRange(
         window.feedTheCow.Game.INJECTION_VELOCITY_MIN,
         window.feedTheCow.Game.INJECTION_VELOCITY_MAX
       );
-      j.checkWorldBounds = true;
-      j.events.onOutOfBounds.add(this.resetInjection, this);
-    }
-  },
-
-  /**
-   * Handles injection going out of bounds
-   * @param {Phaser.Sprite} j - The injection sprite that went out of bounds
-   */
-  resetInjection: function (j) {
-    if (j.y > 0) {
-      this.respawnInjection(j);
     }
   },
 
@@ -388,7 +372,7 @@ window.feedTheCow.Game.prototype = {
         ),
         this.rnd.realInRange(
           window.feedTheCow.Game.SPAWN_Y_MIN,
-          window.feedTheCow.Game.SPAWN_Y_MAX_GRASS
+          window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
         )
       );
       j.body.velocity.x = this.rnd.integerInRange(
@@ -410,7 +394,7 @@ window.feedTheCow.Game.prototype = {
     }
 
     this.score += window.feedTheCow.Game.SCORE_INCREMENT;
-    this.scoreText.text = "Score: " + this.score;
+    this.scoreText.text = "score: " + this.score;
   },
 
   /**
@@ -420,6 +404,10 @@ window.feedTheCow.Game.prototype = {
    * @param {Phaser.Sprite} j - The injection sprite that hit the cow
    */
   injectCow: function (cow, j) {
+    // Arcade overlap keeps calling back for every injection touching the cow
+    // in the same frame, even after the first one killed it.
+    if (this.gameOver) return;
+
     cow.kill();
     this.ouch.play();
     this.animateCow(cow);
@@ -452,7 +440,7 @@ window.feedTheCow.Game.prototype = {
    * @param {Phaser.Pointer} pointer - The pointer that triggered the event
    */
   quitGame: function (pointer) {
-    this.ding.play();
+    window.feedTheCow.selectSound.play();
     this.state.start("StartMenu");
   },
 
@@ -464,8 +452,6 @@ window.feedTheCow.Game.prototype = {
   animateCow: function (cow) {
     var cowDead = this.add.sprite(cow.x + 200, cow.y, "deadCow");
     this.physics.enable(cowDead, Phaser.Physics.ARCADE);
-    cowDead.enableBody = true;
-    cowDead.checkWorldBounds = true;
     cowDead.body.velocity.x = 10;
     cowDead.body.velocity.y = 80;
     cowDead.angle += 120;
@@ -505,12 +491,14 @@ window.feedTheCow.Game.prototype = {
       }
 
       this.background.tilePosition.x -= this.getScrollSpeed();
+      this.recycleOffscreen();
     }
   },
 
   /**
    * Cleanup function called when state shuts down
-   * Destroys all game objects and removes event listeners
+   * Stops the timer and music, destroys sounds and groups, and removes the
+   * gamepad plugin
    */
   shutdown: function () {
     if (this.timer) {
@@ -528,22 +516,19 @@ window.feedTheCow.Game.prototype = {
       this.ouch.destroy();
       this.ouch = null;
     }
-    if (this.ding) {
-      this.ding.destroy();
-      this.ding = null;
+
+    // Plugins belong to the game, not the state, so each run would add another.
+    if (this.gamepad) {
+      this.game.plugins.remove(this.gamepad);
+      this.gamepad = null;
+      this.joystick = null;
     }
 
     if (this.grassGroup) {
-      this.grassGroup.forEach(function (grass) {
-        grass.events.onOutOfBounds.removeAll();
-      }, this);
       this.grassGroup.destroy();
       this.grassGroup = null;
     }
     if (this.injectionGroup) {
-      this.injectionGroup.forEach(function (injection) {
-        injection.events.onOutOfBounds.removeAll();
-      }, this);
       this.injectionGroup.destroy();
       this.injectionGroup = null;
     }
