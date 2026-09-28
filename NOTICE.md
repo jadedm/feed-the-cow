@@ -22,7 +22,7 @@ You may not reuse, redistribute or modify them outside this repository without p
 
 | Path | Project | License |
 | --- | --- | --- |
-| `src/libs/phaser.js`, `src/libs/phaser.min.js`, `src/libs/phaser.map` | Phaser v2.4.8, Copyright 2016 Photon Storm Ltd. | MIT |
+| `src/libs/phaser.js`, `src/libs/phaser.min.js`, `src/libs/phaser.map` | Phaser CE v2.20.2, Copyright Photon Storm Ltd. and Phaser CE contributors | MIT |
 | bundled inside `phaser.js` | p2.js, Copyright 2015 p2.js authors | MIT |
 | bundled inside `phaser.js` | PolyK, Copyright 2012 Ivan Kuckir | MIT |
 | bundled inside `phaser.js` | gl-matrix, Copyright 2013 Brandon Jones and Colin MacKenzie IV | BSD 2-clause style |

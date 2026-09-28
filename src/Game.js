@@ -511,7 +511,11 @@ window.feedTheCow.Game.prototype = {
         this.cow.body.velocity.y = 0;
       }
 
-      this.background.tilePosition.x -= this.getScrollSpeed();
+      // Phaser CE updates once per display frame and moves bodies by the real
+      // frame time (time.delta, ms), so the ground must scroll by it too, or it
+      // runs twice as fast on a 120 Hz screen.
+      var groundPxPerSec = this.getScrollSpeed() * this.time.desiredFps;
+      this.background.tilePosition.x -= (groundPxPerSec * this.time.delta) / 1000;
       this.updateItems();
     }
   },
