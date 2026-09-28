@@ -89,6 +89,7 @@ The game is served by nginx at `http://localhost:8080`.
 
 - Game engine: [Phaser 2](https://phaser.io/). This is Phaser 2, not Phaser 3; the APIs differ.
 - Build tool: [Vite](https://vitejs.dev/)
+- End-to-end tests: [Playwright](https://playwright.dev/) (`npm run test:e2e`)
 - Language: JavaScript (ES modules)
 - On-screen joystick: [Phaser Virtual Gamepad](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad), patched to run with a joystick and no button
 
@@ -109,6 +110,7 @@ feed-the-cow/
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
 ├── scripts/            # Build helpers: asset copy and asset check
+├── tests/e2e/          # Playwright end-to-end tests against the build
 ├── .github/            # CI workflow, issue and PR templates
 ├── vite.config.js
 ├── jsdoc.json

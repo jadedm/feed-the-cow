@@ -23,3 +23,21 @@ jobs:
 
       - name: Build, then check every runtime asset is in dist/
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: End-to-end tests (Chromium, Firefox, WebKit, phone)
+        run: npm run test:e2e
