@@ -27,10 +27,10 @@ The game makes the point directly: fresh green fodder keeps the cow going, and i
 
 ## Features
 
-- Scroll speed keeps rising for as long as you survive, following a square-root curve.
+- The background scrolls faster the longer you survive, following a square-root curve.
 - Injection count climbs from 2 to 23 over the first 50 seconds.
-- Three ways to control the cow: drag with mouse or touch, arrow keys, or an on-screen joystick on mobile.
-- Runs in desktop and mobile browsers, scaled to fit the screen.
+- Three ways to control the cow: drag with mouse or touch, arrow keys, or an on-screen joystick.
+- Runs in desktop and mobile browsers. The 960x540 canvas scales down to fit smaller screens, to a minimum of 480x260.
 - Sound effects and background music.
 
 ## Controls
@@ -39,20 +39,20 @@ The game makes the point directly: fresh green fodder keeps the cow going, and i
 | --- | --- |
 | Mouse or touch | Drag the cow up or down |
 | Arrow keys | Up and down move the cow |
-| Virtual joystick | Touch and drag, bottom right of the screen |
+| On-screen joystick | Touch or click and drag, bottom right of the screen |
 
 ## How to play
 
-1. Move the cow up and down to eat the green grass.
-2. Each grass eaten scores 10 points.
+1. Move the cow up and down to eat the green fodder.
+2. Each piece of fodder scores 10 points.
 3. Avoid the injections. One hit ends the game.
-4. The game speeds up and adds injections over time. Survive as long as you can.
+4. The background speeds up and more injections appear over time. Survive as long as you can.
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 18 or later (required by Vite 5)
+- Node.js 18, or 20 and later (the range Vite 5 supports)
 - npm. The repo commits `package-lock.json`, and the Dockerfile runs `npm ci`, so use npm rather than yarn or pnpm.
 
 ### Run locally
@@ -78,12 +78,16 @@ npm run preview
 
 `npm run deploy` does the build and the copy, then publishes `dist/` to the `gh-pages` branch.
 
+The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
+
+The `Dockerfile` does not do the copy yet, so the image it builds has no images or sound. Tracked in [#4](https://github.com/jadedm/feed-the-cow/issues/4).
+
 ## Tech stack
 
 - Game engine: [Phaser 2](https://phaser.io/). This is Phaser 2, not Phaser 3; the APIs differ.
 - Build tool: [Vite](https://vitejs.dev/)
 - Language: JavaScript (ES modules)
-- Mobile controls: [Phaser Virtual Gamepad](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad), patched to run with a joystick and no button
+- On-screen joystick: [Phaser Virtual Gamepad](https://github.com/ShawnHymel/phaser-plugin-virtual-gamepad), patched to run with a joystick and no button
 
 ## Project structure
 
@@ -98,10 +102,14 @@ feed-the-cow/
 │   ├── Preloader.js    # Asset loading
 │   ├── StartMenu.js    # Title screen
 │   └── Game.js         # Gameplay and tuning constants
+├── screenshots/        # Images used in this README
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
 ├── vite.config.js
 ├── jsdoc.json
+├── Dockerfile          # Two-stage build served by nginx (see Production build)
+├── docker-compose.yml
+├── nginx.conf
 └── package.json
 ```
 
@@ -126,7 +134,7 @@ Background scroll speed is `3 + √(seconds) × 0.5` pixels per frame:
 | 36s | 6 |
 | 64s | 7 |
 
-It has no upper limit.
+Only the background speeds up, with no upper limit. Fodder and injections move at fixed speed ranges set in `src/Game.js`.
 
 ### Injection spawning
 
