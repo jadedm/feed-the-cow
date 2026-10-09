@@ -147,6 +147,16 @@ window.feedTheCow.Game.COW_FIELD_RIGHT = 720;
 window.feedTheCow.Game.COW_RUN_FPS = 14;
 
 /**
+ * The two lines shown under the try-again button when an injection hits.
+ * They are drawn in dark ink with a white outline, so they read over the
+ * field, the cow and the items.
+ */
+window.feedTheCow.Game.GAME_OVER_LINES = [
+  "ouch, an injection!",
+  "fresh grass keeps her going. try again?",
+];
+
+/**
  * Progressive injection spawning configuration
  * Adds more injections over time at specific thresholds
  * Matrix swarm effect at 50 seconds
@@ -630,23 +640,22 @@ window.feedTheCow.Game.prototype = {
     this.animateCow(cow);
     this.music.stop();
     this.gameOver = true;
-    this.overMessage = this.add.button(
-      this.world.centerX - 100,
-      this.world.centerY - 80,
-      "button"
-    );
+    this.overMessage = this.add.button(0, this.world.centerY - 80, "button");
+    this.overMessage.x = this.world.centerX - this.overMessage.width / 2;
     this.overMessageNew = this.add.text(
-      this.world.centerX - 100,
-      this.world.centerY,
-      "come on! \n",
-      { fontSize: "30px", fill: "#000", font: "Quicksand" }
+      this.world.centerX,
+      this.world.centerY + 15,
+      window.feedTheCow.Game.GAME_OVER_LINES[0],
+      { fontSize: "30px", fill: "#2b2b2b", font: "Quicksand", stroke: "#ffffff", strokeThickness: 6 }
     );
+    this.overMessageNew.anchor.set(0.5, 0);
     this.overMessageCenter = this.add.text(
-      this.world.centerX - 220,
-      this.world.centerY + 40,
-      "she's just getting started!",
-      { fontSize: "30px", fill: "#000", font: "Quicksand" }
+      this.world.centerX,
+      this.world.centerY + 55,
+      window.feedTheCow.Game.GAME_OVER_LINES[1],
+      { fontSize: "30px", fill: "#2b2b2b", font: "Quicksand", stroke: "#ffffff", strokeThickness: 6 }
     );
+    this.overMessageCenter.anchor.set(0.5, 0);
     this.overMessage.inputEnabled = true;
     this.overMessage.events.onInputDown.addOnce(this.quitGame, this);
   },
