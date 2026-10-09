@@ -2,7 +2,7 @@
 //
 // Run `node art/build-art.mjs`, then render each SVG to the PNG of the same
 // name in src/images/ (see art/README.md). Everything here is drawn in code,
-// so this art is covered by the MIT license, unlike the woohoo artwork.
+// so this art is covered by the MIT license with the rest of the code.
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -178,7 +178,7 @@ function wrapped(x, width, tileWidth, draw) {
   return copies.join("");
 }
 
-function field() {
+function fieldContent() {
   const W = 960;
   const H = 540;
   const HORIZON = 96;
@@ -226,10 +226,7 @@ function field() {
     );
   }
 
-  return svg(
-    W,
-    H,
-    `
+  return `
   <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8dcf5"/><stop offset="1" stop-color="#dff3fc"/></linearGradient></defs>
   <rect width="${W}" height="${H}" fill="url(#sky)"/>
   ${clouds}
@@ -238,7 +235,130 @@ function field() {
   <rect x="0" y="${HORIZON + 26}" width="${W}" height="${H - HORIZON - 26}" fill="#8ccc66"/>
   ${bands.join("")}
   ${tufts.join("")}
-  ${flowers.join("")}`
+  ${flowers.join("")}`;
+}
+
+function field() {
+  return svg(960, 540, fieldContent());
+}
+
+// Lettering uses Quicksand, the font the game already loads (SIL Open Font
+// License). Render with the font available, see art/README.md.
+const FONT = "Quicksand, sans-serif";
+const NAVY = "#1d2b3a";
+const BLADE = "#4f9a2f";
+const BLADE_LIGHT = "#79c247";
+
+// "feed the cow" in white with a dark outline, centred on x.
+function lettering(x, y, size) {
+  const small = Math.round(size * 0.55);
+  const text = (fill, stroke, width) => `
+    <text x="${x}" y="${y}" text-anchor="middle" font-family="${FONT}" font-weight="700" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round" paint-order="stroke">
+      <tspan font-size="${size}">feed </tspan><tspan font-size="${small}" dy="-${Math.round(size * 0.12)}">THE</tspan><tspan font-size="${size}" dy="${Math.round(size * 0.12)}"> cow</tspan>
+    </text>`;
+  return text(HIDE, INK, Math.round(size * 0.16)) + text(HIDE, "none", 0);
+}
+
+// The first run frame of the cow, placed with its top-left at x, y.
+function cowAt(x, y, scale, id) {
+  const frame = runFrame(0).replace(/hide0/g, id);
+  return `<g transform="translate(${x} ${y}) scale(${scale})">${frame}</g>`;
+}
+
+// A clump of fresh grass with two motion lines behind it, in a 60x30 box.
+// Bright lime with a dark outline, so it stands out against the field.
+function grassTuft(x, y) {
+  const outline = "M3 28 L5 14 L9 21 L11 6 L16 18 L19 1 L23 16 L27 4 L30 17 L34 7 L36 19 L41 11 L42 28 Z";
+  return `<g transform="translate(${x} ${y})">
+    <g stroke="${HIDE}" stroke-width="2.5" stroke-linecap="round">
+      <line x1="46" y1="12" x2="58" y2="12"/><line x1="48" y1="20" x2="58" y2="20"/>
+    </g>
+    <path d="${outline}" fill="#b5e33f" stroke="#2f6b1a" stroke-width="2" stroke-linejoin="round"/>
+    <g stroke="#6aa62a" stroke-width="1.5" stroke-linecap="round">
+      <line x1="12" y1="27" x2="13" y2="14"/><line x1="20" y1="27" x2="20" y2="10"/>
+      <line x1="28" y1="27" x2="28" y2="12"/><line x1="35" y1="27" x2="36" y2="16"/>
+    </g>
+  </g>`;
+}
+
+function grass() {
+  return svg(60, 30, grassTuft(0, 0));
+}
+
+// A syringe pointing left, the way injections fly at the cow, in 60x13.
+function injection() {
+  return svg(
+    60,
+    13,
+    `
+  <line x1="1" y1="6.5" x2="15" y2="6.5" stroke="#8a96a3" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="14" y="4" width="4" height="5" fill="#8a96a3"/>
+  <rect x="18" y="2" width="27" height="9" rx="1.5" fill="#eef6fb" stroke="${INK}" stroke-width="1.4"/>
+  <rect x="19.5" y="3.5" width="15" height="6" fill="#e5484d"/>
+  <g stroke="${INK}" stroke-width="1"><line x1="24" y1="2" x2="24" y2="5"/><line x1="30" y1="2" x2="30" y2="5"/><line x1="36" y1="2" x2="36" y2="5"/></g>
+  <rect x="45" y="5" width="9" height="3" fill="${INK}"/>
+  <rect x="54" y="1" width="3" height="11" rx="1" fill="${INK}"/>`
+  );
+}
+
+function button(width, height, label, size) {
+  return `
+  <rect x="1" y="1" width="${width - 2}" height="${height - 2}" rx="${Math.round(height * 0.18)}" fill="${NAVY}"/>
+  <text x="${width / 2}" y="${height / 2 + size * 0.36}" text-anchor="middle" font-family="${FONT}" font-weight="700" font-size="${size}" fill="${HIDE}">${label}</text>`;
+}
+
+function tryAgain() {
+  return svg(143, 48, button(143, 48, "try again", 22));
+}
+
+function loaderBar() {
+  return svg(
+    291,
+    21,
+    `
+  <rect x="1" y="1" width="289" height="19" rx="9.5" fill="${BLADE}" stroke="${INK}" stroke-width="2"/>
+  <rect x="6" y="5" width="279" height="4" rx="2" fill="${BLADE_LIGHT}"/>`
+  );
+}
+
+// The loading screen: lettering above the cow, on a transparent background.
+function loadingImage() {
+  return svg(
+    425,
+    223,
+    `
+  ${lettering(212, 62, 62)}
+  <ellipse cx="212" cy="210" rx="78" ry="9" fill="#c9b237" opacity="0.7"/>
+  ${cowAt(132, 92, 1.0, "hide-load")}`
+  );
+}
+
+function instruction(number, x, y, text) {
+  return `
+  <circle cx="${x}" cy="${y - 8}" r="15" fill="${NAVY}"/>
+  <text x="${x}" y="${y - 1}" text-anchor="middle" font-family="${FONT}" font-weight="700" font-size="20" fill="${HIDE}">${number}</text>
+  <text x="${x + 28}" y="${y}" font-family="${FONT}" font-size="24" fill="${INK}">${text}</text>`;
+}
+
+function titleScreen() {
+  return svg(
+    960,
+    540,
+    `
+  ${fieldContent()}
+  <rect x="150" y="345" width="660" height="150" rx="18" fill="${HIDE}" opacity="0.85"/>
+  ${lettering(480, 105, 96)}
+  ${cowAt(150, 175, 1.25, "hide-title")}
+  <g transform="translate(400 222)">${button(160, 60, "let’s play", 28)}</g>
+  <g transform="translate(610 228) scale(1.6)">${grassTuft(0, 0)}</g>
+  ${instruction(1, 190, 388, "steer with the arrows, WASD, the joystick or a drag")}
+  ${instruction(2, 190, 430, "eat the fresh grass and dodge the injections!")}
+  <g transform="translate(330 456)">
+    <rect x="0" y="4" width="16" height="26" rx="3" fill="none" stroke="${INK}" stroke-width="2"/>
+    <rect x="22" y="12" width="26" height="16" rx="3" fill="none" stroke="${INK}" stroke-width="2"/>
+    <path d="M14 0 q10 0 12 8" fill="none" stroke="${INK}" stroke-width="1.6"/>
+    <text x="60" y="25" font-family="${FONT}" font-size="20" fill="${INK}">turn your phone sideways to play</text>
+  </g>`
   );
 }
 
@@ -247,6 +367,12 @@ const files = {
   "cow-hit.svg": hitCow(),
   "cow-icon.svg": icon(),
   "field.svg": field(),
+  "title.svg": titleScreen(),
+  "loading.svg": loadingImage(),
+  "loader-bar.svg": loaderBar(),
+  "try-again.svg": tryAgain(),
+  "grass.svg": grass(),
+  "injection.svg": injection(),
 };
 
 for (const [name, content] of Object.entries(files)) {
