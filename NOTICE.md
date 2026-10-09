@@ -1,22 +1,25 @@
 # Licensing notes
 
-The MIT license in `LICENSE` covers the source code in this repository and the game art, which is drawn in code (below). Third-party code keeps its own license.
+The MIT license in `LICENSE` covers the source code in this repository and the game art and sound, which are made in code (below). Third-party code keeps its own license.
 
-## Not covered: audio, screenshots and brand
+## Not covered: screenshots and brand
 
 These are not licensed under MIT. All rights are reserved by their owners:
 
-- the audio in `src/audio/`
 - the screenshots in `screenshots/`
 - the woohoo name and logo, and the woohoo campaign text, wherever they appear, including the title, description and social tags in `index.html`
 
-You may not reuse, redistribute or modify them outside this repository without permission. To publish a fork of the game, replace the audio, screenshots and woohoo text with your own.
+You may not reuse, redistribute or modify them outside this repository without permission. To publish a fork of the game, replace the screenshots and woohoo text with your own.
 
 ## Covered by MIT: art drawn in code
 
 Every image in `src/images/` except `gamepad_spritesheet.png` is rendered from the SVG sources in `art/`, which `art/build-art.mjs` draws in code (`art/README.md` lists them). They are part of this project and covered by the MIT license with the code. Their lettering is set in Quicksand, which is under the SIL Open Font License.
 
 `src/images/gamepad_spritesheet.png` is not reserved either: it is byte-identical to the joystick graphic distributed with the Phaser Virtual Gamepad plugin, and is covered by that plugin's license, below.
+
+## Covered by MIT: sound made in code
+
+The music and sound effects in `src/audio/` are synthesised by `scripts/build-audio.mjs` and are covered by the MIT license with the code.
 
 ## Third-party code
 

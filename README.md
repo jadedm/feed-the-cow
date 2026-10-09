@@ -119,7 +119,7 @@ feed-the-cow/
 ├── nginx.conf
 ├── package.json
 ├── LICENSE             # MIT, for the code
-├── NOTICE.md           # Art and audio reserved, third-party licenses
+├── NOTICE.md           # What is MIT and what is reserved, third-party licenses
 └── CONTRIBUTING.md
 ```
 
@@ -170,7 +170,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-The game's art is drawn in code and is MIT too. The audio, the screenshots and the woohoo name, logo and campaign text are not: they stay all rights reserved, so a fork you publish must replace them. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
+The game's art and sound are made in code and are MIT too. The screenshots and the woohoo name, logo and campaign text are not: they stay all rights reserved, so a fork you publish must replace them. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
 
 ## Acknowledgments
 
