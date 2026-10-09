@@ -410,6 +410,17 @@ test.describe("full play", () => {
       });
       await page.waitForFunction(() => window.__game.state.getCurrentState().gameOver === true);
       await page.waitForTimeout(500);
+      const over = await page.evaluate(() => {
+        const state = window.__game.state.getCurrentState();
+        const centre = (o) => o.x + o.width * (0.5 - o.anchor.x);
+        return {
+          lines: [state.overMessageNew.text, state.overMessageCenter.text],
+          centres: [state.overMessage, state.overMessageNew, state.overMessageCenter].map(centre),
+          expected: window.feedTheCow.Game.GAME_OVER_LINES,
+        };
+      });
+      expect(over.lines).toEqual(over.expected);
+      for (const x of over.centres) expect(Math.abs(x - 480)).toBeLessThan(2);
       const button = await page.evaluate(() => {
         const b = window.__game.state.getCurrentState().overMessage;
         return [b.x + b.width / 2, b.y + b.height / 2];

@@ -9,13 +9,13 @@ A browser arcade game built with Phaser 2 for World Milk Day. Steer the cow arou
 <div align="center">
 
 ### Title screen
-![Title screen](screenshots/feed-the-cow-3.png)
+![Title screen](screenshots/title.png)
 
 ### Gameplay
-![Gameplay](screenshots/feed-the-cow-2.png)
+![Gameplay](screenshots/gameplay.png)
 
 ### Game over
-![Game over](screenshots/feed-the-cow-1.png)
+![Game over](screenshots/game-over.png)
 
 </div>
 
@@ -106,7 +106,7 @@ feed-the-cow/
 │   ├── Preloader.js    # Asset loading
 │   ├── StartMenu.js    # Title screen
 │   └── Game.js         # Gameplay and tuning constants
-├── screenshots/        # Images used in this README
+├── screenshots/        # README images, taken by scripts/take-screenshots.mjs
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
 ├── scripts/            # Sound generation, asset copy and asset check
@@ -119,7 +119,7 @@ feed-the-cow/
 ├── nginx.conf
 ├── package.json
 ├── LICENSE             # MIT, for the code
-├── NOTICE.md           # What is MIT and what is reserved, third-party licenses
+├── NOTICE.md           # Licenses: MIT, plus the third-party code and font
 └── CONTRIBUTING.md
 ```
 
@@ -170,7 +170,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-The game's art and sound are made in code and are MIT too. The screenshots and the woohoo name, logo and campaign text are not: they stay all rights reserved, so a fork you publish must replace them. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
+The art, sound and screenshots are MIT too: the art and sound are made in code, and the screenshots are taken from the game. [NOTICE.md](NOTICE.md) lists the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own MIT licenses) and the Quicksand font (SIL Open Font License).
 
 ## Acknowledgments
 
