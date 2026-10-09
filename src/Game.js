@@ -143,8 +143,8 @@ window.feedTheCow.Game.COW_FIELD_RIGHT = 720;
 
 /**
  * The cow's top edge stops here: one row under the sky, which reaches y 105
- * in the field image, so no part of the drawing (it reaches the top row of
- * its frame) runs into the sky. The highest grass (SPAWN_Y_MIN_GRASS) is
+ * in the field image, so no part of the drawing runs into the sky (the hit
+ * frame reaches the top row of its frame, the run frames row 1). The highest grass (SPAWN_Y_MIN_GRASS) is
  * still in reach.
  */
 window.feedTheCow.Game.COW_FIELD_TOP = 106;
@@ -455,8 +455,12 @@ window.feedTheCow.Game.prototype = {
     var along = stepX * dx + stepY * dy;
     if (along <= dx * dx + dy * dy) return false;
 
-    body.position.x = body.prev.x + dx;
-    body.position.y = body.prev.y + dy;
+    // Phaser's bounds check has already run this frame, so keep the snapped
+    // box inside the field too, or a drag point above the top edge would draw
+    // the cow in the sky for a frame.
+    var bounds = this.physics.arcade.bounds;
+    body.position.x = Phaser.Math.clamp(body.prev.x + dx, bounds.x, bounds.right - body.width);
+    body.position.y = Phaser.Math.clamp(body.prev.y + dy, bounds.y, bounds.bottom - body.height);
     body.velocity.x = 0;
     body.velocity.y = 0;
     return true;

@@ -305,6 +305,42 @@ test.describe("drag", () => {
     expect(highest).toBeLessThan(108);
   });
 
+  test("a long frame never snaps the dragged cow into the sky", async ({ page }) => {
+    await quietGame(page);
+    await page.evaluate(() => {
+      const game = window.__game;
+      const state = game.state.getCurrentState();
+      state.cow.y = 106;
+    });
+    await page.waitForTimeout(100);
+    await page.evaluate(() => {
+      const game = window.__game;
+      const state = game.state.getCurrentState();
+      // Running right along the top edge toward a drag point 80 px ahead and
+      // 10 px above the edge, then one 200 ms frame (Phaser's longest).
+      window.__frames = [1000 / 60, 200, 1000 / 60, 1000 / 60, 1000 / 60];
+      window.__cowY = [];
+      const preUpdate = game.time.preUpdate;
+      game.time.preUpdate = function (delta) {
+        window.__cowY.push(state.cow.y);
+        const forced = window.__frames.shift();
+        return preUpdate.call(this, forced === undefined ? delta : forced / 1000);
+      };
+      state.dragGrab = { x: 0, y: 0 };
+      state.dragPointer = { worldX: state.cow.x + 80, worldY: 96 };
+      state.cow.body.velocity.x = window.feedTheCow.Game.COW_TOP_SPEED;
+      state.cow.body.velocity.y = 0;
+    });
+    await page.waitForFunction(() => window.__frames.length === 0 && window.__cowY.length > 6);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.dragPointer = null;
+      state.dragGrab = null;
+      return window.__cowY;
+    });
+    expect(Math.min(...ys), `cow y per frame ${ys.join(", ")}`).toBeGreaterThanOrEqual(106);
+  });
+
   test("a drag top to bottom takes time, never faster than top speed", async ({ page, isMobile }) => {
     await quietGame(page);
     await page.evaluate(() => {
