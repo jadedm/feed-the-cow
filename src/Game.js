@@ -397,6 +397,26 @@ window.feedTheCow.Game.prototype = {
     var share = 1 - Math.exp(-seconds / response);
     velocity.x += (desired.x - velocity.x) * share;
     velocity.y += (desired.y - velocity.y) * share;
+    if (this.dragPointer) this.stopAtDragPoint(seconds);
+  },
+
+  /**
+   * On a long frame, one step of movement can carry the cow past the drag
+   * point before the easing slows it. Cap the speed so this frame's step
+   * ends on the point at most.
+   * @param {number} seconds - This frame's length
+   */
+  stopAtDragPoint: function (seconds) {
+    var velocity = this.cow.body.velocity;
+    var dx = this.dragPointer.worldX - this.dragGrab.x - this.cow.x;
+    var dy = this.dragPointer.worldY - this.dragGrab.y - this.cow.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    var speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+    if (seconds <= 0 || speed * seconds <= distance) return;
+
+    var scale = distance / (speed * seconds);
+    velocity.x *= scale;
+    velocity.y *= scale;
   },
 
   /**

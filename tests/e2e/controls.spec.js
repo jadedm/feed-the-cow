@@ -252,6 +252,31 @@ test.describe("drag", () => {
     const at5 = track.find((p) => p.y <= target.y + 5);
     expect((at5.t - at60.t) / 1000).toBeGreaterThan(55 / TOP_SPEED);
   });
+
+  test("a long frame never carries the dragged cow past the drag point", async ({ page }) => {
+    await quietGame(page);
+    const step = await page.evaluate(() => {
+      const game = window.__game;
+      const state = game.state.getCurrentState();
+      // A drag point 10 px above the cow, the cow already at top speed toward
+      // it, and one 200 ms frame (Phaser's longest).
+      state.dragGrab = { x: 0, y: 0 };
+      state.dragPointer = { worldX: state.cow.x, worldY: state.cow.y - 10 };
+      state.cow.body.velocity.x = 0;
+      state.cow.body.velocity.y = -window.feedTheCow.Game.COW_TOP_SPEED;
+      const delta = Object.getOwnPropertyDescriptor(game.time, "delta");
+      Object.defineProperty(game.time, "delta", { value: 200, configurable: true, writable: true });
+      state.moveCow();
+      if (delta) Object.defineProperty(game.time, "delta", delta);
+      else delete game.time.delta;
+      const travel = -state.cow.body.velocity.y * 0.2;
+      state.dragPointer = null;
+      state.dragGrab = null;
+      return { travel, distance: 10 };
+    });
+    expect(step.travel).toBeLessThanOrEqual(step.distance + 0.01);
+    expect(step.travel).toBeGreaterThan(0);
+  });
 });
 
 test.describe("same feel on any display rate", () => {
@@ -273,8 +298,8 @@ test.describe("same feel on any display rate", () => {
         window.__speeds = [];
         window.__sampling = true;
         const sample = () => {
-          const body = window.__game.state.getCurrentState().cow.body;
-          window.__speeds.push({ t: performance.now(), v: body.velocity.x });
+          const cow = window.__game.state.getCurrentState().cow;
+          window.__speeds.push({ t: performance.now(), v: cow.body.velocity.x, x: cow.x });
           if (window.__sampling) requestAnimationFrame(sample);
         };
         // One sample now, at rest, so the first crossing has a point before it
@@ -282,8 +307,9 @@ test.describe("same feel on any display rate", () => {
         sample();
       });
       await page.keyboard.down("ArrowRight");
-      await page.waitForTimeout(400);
-      const rise = await page.evaluate((top) => {
+      await page.waitForTimeout(1000);
+      await page.keyboard.up("ArrowRight");
+      const { rise, topSpeed } = await page.evaluate((top) => {
         window.__sampling = false;
         const speeds = window.__speeds;
         // Time the speed crosses `level`, interpolated between samples.
@@ -296,19 +322,19 @@ test.describe("same feel on any display rate", () => {
         };
         const t30 = crossing(top * 0.3);
         const t80 = crossing(top * 0.8);
-        return t30 === null || t80 === null ? null : (t80 - t30) / 1000;
+        if (t30 === null || t80 === null) return { rise: null, topSpeed: null };
+        // Top speed from positions and page timestamps, 0.3 to 0.7 s after the
+        // rise began: fully up to speed, and well before the cow's 560 px limit.
+        const at = (ms) => speeds.find((s) => s.t >= t30 + ms);
+        const a = at(300);
+        const b = at(700);
+        const topSpeed = a && b ? (b.x - a.x) / ((b.t - a.t) / 1000) : null;
+        return { rise: (t80 - t30) / 1000, topSpeed };
       }, TOP_SPEED);
       expect(rise).toBeGreaterThan(0.07);
       expect(rise).toBeLessThan(0.15);
-      const x0 = await page.evaluate(() => window.__game.state.getCurrentState().cow.x);
-      const t0 = Date.now();
-      await page.waitForTimeout(800);
-      const x1 = await page.evaluate(() => window.__game.state.getCurrentState().cow.x);
-      const seconds = (Date.now() - t0) / 1000;
-      await page.keyboard.up("ArrowRight");
-      const speed = (x1 - x0) / seconds;
-      expect(speed).toBeGreaterThan(TOP_SPEED * 0.9);
-      expect(speed).toBeLessThan(TOP_SPEED * 1.1);
+      expect(topSpeed).toBeGreaterThan(TOP_SPEED * 0.95);
+      expect(topSpeed).toBeLessThan(TOP_SPEED * 1.05);
     });
   }
 });
