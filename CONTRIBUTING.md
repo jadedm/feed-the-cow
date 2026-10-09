@@ -56,7 +56,7 @@ When a test drives the game, read the canvas position right before each click (`
 
 ## Art and audio
 
-The game's images, audio, screenshots and the woohoo brand are not under the MIT license (see [NOTICE.md](NOTICE.md)). Pull requests that add or change art or audio will not be merged. If you want to propose new art, open an issue to discuss it first.
+The game's images are drawn in code by `art/build-art.mjs` and are MIT with the rest of the code. To change one, edit the drawing code and re-render with `art/render-art.mjs` (`art/README.md`); pull requests with images not produced that way will not be merged. The audio, screenshots and the woohoo brand are not under the MIT license (see [NOTICE.md](NOTICE.md)), and pull requests that change them will not be merged. Open an issue first for new art or sound.
 
 ## License
 

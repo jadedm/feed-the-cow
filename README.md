@@ -170,7 +170,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-Most of the game's images, and its audio, screenshots and the woohoo name, logo and campaign text, are not. They stay all rights reserved, so a fork you publish must replace them; the cow and field art drawn in code is MIT and can be reused. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
+The game's art is drawn in code and is MIT too. The audio, the screenshots and the woohoo name, logo and campaign text are not: they stay all rights reserved, so a fork you publish must replace them. [NOTICE.md](NOTICE.md) lists the exceptions and the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own licenses).
 
 ## Acknowledgments
 

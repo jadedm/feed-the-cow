@@ -2,7 +2,8 @@
 // Playwright then serves dist/ with `vite preview` and runs tests/e2e/.
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 4173;
+// E2E_PORT lets the suite run beside a preview already using 4173.
+const PORT = Number(process.env.E2E_PORT) || 4173;
 
 export default defineConfig({
   testDir: "tests/e2e",
