@@ -271,7 +271,7 @@ function grassTuft(x, y) {
   const outline = "M3 28 L5 14 L9 21 L11 6 L16 18 L19 1 L23 16 L27 4 L30 17 L34 7 L36 19 L41 11 L42 28 Z";
   return `<g transform="translate(${x} ${y})">
     <g stroke="${HIDE}" stroke-width="2.5" stroke-linecap="round">
-      <line x1="46" y1="12" x2="58" y2="12"/><line x1="48" y1="20" x2="58" y2="20"/>
+      <line x1="46" y1="12" x2="57" y2="12"/><line x1="48" y1="20" x2="57" y2="20"/>
     </g>
     <path d="${outline}" fill="#b5e33f" stroke="#2f6b1a" stroke-width="2" stroke-linejoin="round"/>
     <g stroke="#6aa62a" stroke-width="1.5" stroke-linecap="round">

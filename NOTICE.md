@@ -1,8 +1,8 @@
 # Licensing notes
 
-The MIT license in `LICENSE` covers the source code in this repository, and the cow and field art drawn in code (listed below). Third-party code keeps its own license.
+The MIT license in `LICENSE` covers the source code in this repository and the game art, which is drawn in code (below). Third-party code keeps its own license.
 
-## Not covered: game art, audio and brand
+## Not covered: audio, screenshots and brand
 
 These are not licensed under MIT. All rights are reserved by their owners:
 

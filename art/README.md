@@ -20,8 +20,8 @@ The sizes are fixed: collision boxes, item spacing and the tests depend on them.
 ## Changing the art
 
 1. Edit `build-art.mjs` and run `node art/build-art.mjs`. It rewrites every SVG listed above.
-2. Render each SVG to its PNG at the exact size above. Lettering uses Quicksand (SIL Open Font License), so render with that font loaded, or the text falls back to another font. With Playwright: load the SVG into a page that includes `https://fonts.googleapis.com/css?family=Quicksand:400,700`, wait for `document.fonts.load("700 20px Quicksand")`, give the SVG `display: block; position: absolute; left: 0; top: 0` so it sits on whole pixels, then `page.locator("svg").screenshot({ path, omitBackground })`, with `omitBackground: true` for the transparent ones.
-3. Check each PNG's size (`sips -g pixelWidth -g pixelHeight`), then run `npm run test:e2e` and play the game in `npm run preview`.
+2. Run `node art/render-art.mjs` to render every SVG to its PNG at the size above, or name the SVGs that changed (`node art/render-art.mjs grass.svg`). It renders in Playwright's Chromium with Quicksand (SIL Open Font License) loaded from Google Fonts, and exits non-zero if the font does not load or a PNG comes out at the wrong size. A different Chromium can shift anti-aliasing at the edges, so commit only the PNGs whose SVGs changed.
+3. Run `npm run test:e2e` and play the game in `npm run preview`.
 
 The frame size and count are also set where the game loads the sprite sheet, in `src/Preloader.js`. The collision box is set in `buildCow` in `src/Game.js`; keep it over the torso and head if the drawing changes.
 
