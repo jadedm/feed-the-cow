@@ -1,20 +1,20 @@
 # Licensing notes
 
-The MIT license in `LICENSE` covers the source code in this repository, and the cow and field art drawn in code (listed below). Third-party code keeps its own license.
+The MIT license in `LICENSE` covers the source code in this repository and the game art, which is drawn in code (below). Third-party code keeps its own license.
 
-## Not covered: game art, audio and brand
+## Not covered: audio, screenshots and brand
 
 These are not licensed under MIT. All rights are reserved by their owners:
 
-- the images in `src/images/`, except the ones listed under "Covered by MIT" below, and the audio in `src/audio/`
+- the audio in `src/audio/`
 - the screenshots in `screenshots/`
 - the woohoo name and logo, and the woohoo campaign text, wherever they appear, including the title, description and social tags in `index.html`
 
-You may not reuse, redistribute or modify them outside this repository without permission. To publish a fork of the game, replace the art, audio, screenshots and woohoo text with your own.
+You may not reuse, redistribute or modify them outside this repository without permission. To publish a fork of the game, replace the audio, screenshots and woohoo text with your own.
 
 ## Covered by MIT: art drawn in code
 
-`src/images/cow-run.png`, `src/images/cow-hit.png`, `src/images/cow-icon.png` and `src/images/field.png` are rendered from the SVG sources in `art/`, which `art/build-art.mjs` draws in code. They are part of this project and covered by the MIT license with the code.
+Every image in `src/images/` except `gamepad_spritesheet.png` is rendered from the SVG sources in `art/`, which `art/build-art.mjs` draws in code (`art/README.md` lists them). They are part of this project and covered by the MIT license with the code. Their lettering is set in Quicksand, which is under the SIL Open Font License.
 
 `src/images/gamepad_spritesheet.png` is not reserved either: it is byte-identical to the joystick graphic distributed with the Phaser Virtual Gamepad plugin, and is covered by that plugin's license, below.
 
