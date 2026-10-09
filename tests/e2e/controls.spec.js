@@ -180,6 +180,26 @@ test.describe("keys", () => {
     expect(frames[frames.length - 1].v).toBeLessThan(TOP_SPEED * 0.05);
   });
 
+  test("the cow at its highest still reaches the highest grass", async ({ page }) => {
+    await quietGame(page);
+    const result = await page.evaluate(async () => {
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const state = window.__game.state.getCurrentState();
+      state.cow.x = 200;
+      state.cow.y = -500;
+      await sleep(100);
+      const highest = state.cow.y;
+      state.grassGroup.forEachAlive((g) => g.kill());
+      const before = state.score;
+      const grass = state.grassGroup.getFirstDead();
+      grass.reset(state.cow.x + 60, window.feedTheCow.Game.SPAWN_Y_MIN_GRASS);
+      await sleep(150);
+      return { highest, gained: state.score - before };
+    });
+    expect(result.highest).toBe(106);
+    expect(result.gained).toBe(10);
+  });
+
   test("the whole cow stays in its part of the field against every edge", async ({ page, isMobile }) => {
     test.skip(isMobile, "no keyboard on the phone profile");
     await quietGame(page);
@@ -197,15 +217,15 @@ test.describe("keys", () => {
       seen.maxRight = Math.max(seen.maxRight, box.right);
       seen.maxBottom = Math.max(seen.maxBottom, box.bottom);
     }
-    // Inside the field, and the cow's right edge stops at 720 so injections
-    // entering at 960 can be seen coming.
+    // Inside the field, below the sky (which reaches y 105), and the cow's
+    // right edge stops at 720 so injections entering at 960 can be seen coming.
     expect(seen.minX).toBeGreaterThanOrEqual(0);
-    expect(seen.minY).toBeGreaterThanOrEqual(0);
+    expect(seen.minY).toBeGreaterThanOrEqual(106);
     expect(seen.maxRight).toBeLessThanOrEqual(720);
     expect(seen.maxBottom).toBeLessThanOrEqual(540);
     // And it reaches each limit, so the bounds are not simply too small.
     expect(seen.minX).toBeLessThan(2);
-    expect(seen.minY).toBeLessThan(2);
+    expect(seen.minY).toBeLessThan(108);
     expect(seen.maxRight).toBeGreaterThan(718);
     expect(seen.maxBottom).toBeGreaterThan(538);
   });
@@ -274,29 +294,82 @@ test.describe("drag", () => {
     expect(end.y - start.y).toBeGreaterThan(100);
   });
 
+  test("a drag into the sky stops the cow at the top of the field", async ({ page, isMobile }) => {
+    await quietGame(page);
+    const start = await cowPosition(page);
+    const track = await trackCow(page, () =>
+      drag(page, isMobile, [start.x + 80, start.y + 45], [start.x + 80, 10], { holdMs: 1500 })
+    );
+    const highest = Math.min(...track.map((p) => p.y));
+    expect(highest).toBeGreaterThanOrEqual(106);
+    expect(highest).toBeLessThan(108);
+  });
+
+  test("a long frame never snaps the dragged cow into the sky", async ({ page }) => {
+    await quietGame(page);
+    await page.evaluate(() => {
+      const game = window.__game;
+      const state = game.state.getCurrentState();
+      state.cow.y = 106;
+    });
+    await page.waitForTimeout(100);
+    await page.evaluate(() => {
+      const game = window.__game;
+      const state = game.state.getCurrentState();
+      // Running right along the top edge toward a drag point 80 px ahead and
+      // 10 px above the edge, then one 200 ms frame (Phaser's longest).
+      window.__frames = [1000 / 60, 200, 1000 / 60, 1000 / 60, 1000 / 60];
+      window.__cowY = [];
+      const preUpdate = game.time.preUpdate;
+      game.time.preUpdate = function (delta) {
+        window.__cowY.push(state.cow.y);
+        const forced = window.__frames.shift();
+        return preUpdate.call(this, forced === undefined ? delta : forced / 1000);
+      };
+      state.dragGrab = { x: 0, y: 0 };
+      state.dragPointer = { worldX: state.cow.x + 80, worldY: 96 };
+      state.cow.body.velocity.x = window.feedTheCow.Game.COW_TOP_SPEED;
+      state.cow.body.velocity.y = 0;
+    });
+    await page.waitForFunction(() => window.__frames.length === 0 && window.__cowY.length > 6);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.dragPointer = null;
+      state.dragGrab = null;
+      return window.__cowY;
+    });
+    expect(Math.min(...ys), `cow y per frame ${ys.join(", ")}`).toBeGreaterThanOrEqual(106);
+  });
+
   test("a drag top to bottom takes time, never faster than top speed", async ({ page, isMobile }) => {
     await quietGame(page);
     await page.evaluate(() => {
       const cow = window.__game.state.getCurrentState().cow;
       cow.x = 300;
-      cow.y = 0;
+      cow.y = 106;
     });
     await page.waitForTimeout(100);
     const track = await trackCow(page, () =>
-      drag(page, isMobile, [380, 45], [380, 485], { holdMs: 2500 })
+      drag(page, isMobile, [380, 151], [380, 485], { holdMs: 2500 })
     );
     // Time from the cow's first movement, not from before the press: the drag
     // helper holds still for 100 ms first.
     const started = track.find((p) => p.y > track[0].y + 2);
     const arrived = track.find((p) => p.y >= 430);
     expect(arrived, "cow reached the bottom").toBeTruthy();
-    // 428 px at 450 px/s is 0.95 s before any easing in or out.
-    expect((arrived.t - started.t) / 1000).toBeGreaterThan(0.9);
+    // No faster than top speed over the whole trip, before any easing in or
+    // out (about 320 px, 0.71 s).
+    expect((arrived.t - started.t) / 1000).toBeGreaterThan((arrived.y - started.y) / TOP_SPEED);
     expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.03);
   });
 
   test("the cow eases to a stop on the drag point without overshooting", async ({ page, isMobile }) => {
     await quietGame(page);
+    // Low enough that the point 150 px up stays below the sky (y 106).
+    await page.evaluate(() => {
+      window.__game.state.getCurrentState().cow.y = 300;
+    });
+    await page.waitForTimeout(100);
     const start = await cowPosition(page);
     // Diagonal, so the horizontal grab offset is checked as well as the vertical.
     const target = { x: start.x + 150, y: start.y - 150 };
@@ -417,7 +490,7 @@ test.describe("same feel on any display rate", () => {
 });
 
 test.describe("collisions from anywhere", () => {
-  for (const [x, y] of [[0, 0], [560, 0], [0, 440], [560, 440], [300, 220]]) {
+  for (const [x, y] of [[0, 106], [560, 106], [0, 440], [560, 440], [300, 220]]) {
     test(`cow at ${x},${y}: grass scores, an injection ends the game`, async ({ page }) => {
       await quietGame(page);
       const result = await page.evaluate(
