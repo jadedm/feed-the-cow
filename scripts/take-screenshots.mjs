@@ -5,11 +5,12 @@
 // serves dist/ with `vite preview` on its own port, drives the game in
 // Playwright's Chromium with the sound muted, and stops the server when done.
 // Items spawn at random, so the run screenshot differs a little each time.
-// Exits non-zero, writing nothing, if any step fails or a shot is the wrong
-// size.
+// Exits non-zero, writing nothing, if port 4199 is already taken, the server
+// stops early, any step fails or a shot is the wrong size.
 import { chromium } from "@playwright/test";
 import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { renameSync, writeFileSync } from "node:fs";
+import { connect } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,14 +19,50 @@ const OUT = join(ROOT, "screenshots");
 const PORT = 4199;
 const URL = `http://localhost:${PORT}/`;
 
-const server = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], {
-  cwd: ROOT,
-  stdio: "ignore",
-});
+// Another server on the port would be screenshotted instead of this build.
+// Vite may listen on IPv4 or IPv6 localhost only, so try to connect to both:
+// a binding test on the wildcard address can succeed beside it.
+function answers(host, port) {
+  return new Promise((resolve) => {
+    const socket = connect({ host, port });
+    socket.setTimeout(1000);
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.once("error", () => resolve(false));
+  });
+}
+
+async function portIsFree(port) {
+  const taken = await Promise.all([answers("127.0.0.1", port), answers("::1", port)]);
+  return !taken.some(Boolean);
+}
+
+let server = null;
+let serverExited = null;
+
+function startServer() {
+  server = spawn(join(ROOT, "node_modules", ".bin", "vite"), ["preview", "--port", String(PORT), "--strictPort"], {
+    cwd: ROOT,
+    stdio: "ignore",
+  });
+  serverExited = new Promise((resolve) => {
+    server.once("exit", resolve);
+    server.once("error", resolve);
+  });
+}
 
 async function waitForServer() {
+  let stopped = false;
+  serverExited.then(() => (stopped = true));
   for (let i = 0; i < 100; i++) {
-    const ok = await fetch(URL).then((r) => r.ok, () => false);
+    if (stopped) throw new Error("vite preview stopped before answering; run `npm run build` first");
+    const ok = await fetch(URL, { signal: AbortSignal.timeout(1000) }).then((r) => r.ok, () => false);
     if (ok) return;
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -111,16 +148,22 @@ async function take() {
 
 let code = 0;
 try {
+  if (!(await portIsFree(PORT))) throw new Error(`port ${PORT} is in use; stop whatever is serving it`);
+  startServer();
   await waitForServer();
   const shots = await take();
-  writeFileSync(join(OUT, "title.png"), shots.title);
-  writeFileSync(join(OUT, "gameplay.png"), shots.run);
-  writeFileSync(join(OUT, "game-over.png"), shots.over);
+  // Temporary names first, then rename, so a failed write replaces nothing.
+  const files = { "title.png": shots.title, "gameplay.png": shots.run, "game-over.png": shots.over };
+  for (const [name, buffer] of Object.entries(files)) writeFileSync(join(OUT, `.${name}.tmp`), buffer);
+  for (const name of Object.keys(files)) renameSync(join(OUT, `.${name}.tmp`), join(OUT, name));
   console.log("Wrote screenshots/title.png, gameplay.png and game-over.png, 960x540 each.");
 } catch (error) {
   console.error(`Nothing written. ${error.message}`);
   code = 1;
 } finally {
-  server.kill();
+  if (server) {
+    server.kill();
+    await serverExited;
+  }
 }
 process.exit(code);

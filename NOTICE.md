@@ -1,6 +1,6 @@
 # Licensing notes
 
-Everything in this repository is covered by the MIT license in `LICENSE`, except the third-party code listed below, which keeps its own license, and the Quicksand font, which is under the SIL Open Font License. That includes the game art and sound, which are made in code, and the screenshots, which are taken from the game.
+Everything in this repository is covered by the MIT license in `LICENSE`, except the third-party code listed below, which keeps its own license. That includes the game art and sound, which are made in code, and the screenshots, which are taken from the game.
 
 ## Art drawn in code
 
@@ -18,7 +18,7 @@ The images in `screenshots/` are taken from the built game by `scripts/take-scre
 
 ## Quicksand
 
-The page loads Quicksand from Google Fonts, and the lettering in the art is rendered with it. Quicksand is by Andrew Paglinawan and is licensed under the SIL Open Font License 1.1. No font files are stored in this repository.
+The page loads Quicksand from Google Fonts, and the lettering in the art is rendered with it. Quicksand is by Andrew Paglinawan and the Quicksand Project Authors, under the SIL Open Font License 1.1. No font files are stored in this repository.
 
 ## Third-party code
 

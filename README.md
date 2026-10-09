@@ -109,7 +109,7 @@ feed-the-cow/
 ├── screenshots/        # README images, taken by scripts/take-screenshots.mjs
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
-├── scripts/            # Sound generation, asset copy and asset check
+├── scripts/            # Sound generation, screenshots, asset copy and asset check
 ├── tests/e2e/          # Playwright end-to-end tests against the build
 ├── .github/            # CI workflow, issue and PR templates
 ├── vite.config.js
@@ -170,7 +170,7 @@ Bug reports and ideas go in [Issues](https://github.com/jadedm/feed-the-cow/issu
 
 The code is under the [MIT License](LICENSE).
 
-The art, sound and screenshots are MIT too: the art and sound are made in code, and the screenshots are taken from the game. [NOTICE.md](NOTICE.md) lists the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own MIT licenses) and the Quicksand font (SIL Open Font License).
+The art, sound and screenshots are MIT too: the art and sound are made in code, and the screenshots are taken from the game. [NOTICE.md](NOTICE.md) lists the third-party code (Phaser 2 and the Phaser Virtual Gamepad plugin, under their own MIT licenses, and gl-matrix inside Phaser under a BSD license) and the Quicksand font (SIL Open Font License).
 
 ## Acknowledgments
 
