@@ -1,6 +1,6 @@
 # Feed The Cow
 
-A browser arcade game built with Phaser 2 for World Milk Day. Steer the cow up and down to eat green fodder and avoid the injections.
+A browser arcade game built with Phaser 2 for World Milk Day. Steer the cow around the field to eat green fodder and avoid the injections.
 
 [![GitHub stars](https://img.shields.io/github/stars/jadedm/feed-the-cow?style=social)](https://github.com/jadedm/feed-the-cow)
 

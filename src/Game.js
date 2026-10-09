@@ -125,8 +125,9 @@ window.feedTheCow.Game.COW_RESPONSE_TIME = 0.08;
 
 /**
  * The cow's right edge stops here, not at the edge of the field. Injections
- * appear at x = 960 moving about 425 px/s, so this leaves about half a
- * second to see one coming, and keeps the cow clear of the joystick.
+ * appear at x = 960 and speed up as the game goes on: at the start this
+ * leaves about half a second to see one coming, a third of a second after
+ * 100 s. It also keeps the cow clear of the joystick.
  */
 window.feedTheCow.Game.COW_FIELD_RIGHT = 720;
 
@@ -333,16 +334,19 @@ window.feedTheCow.Game.prototype = {
 
   /**
    * The velocity the player is asking for, in pixels per second, capped at
-   * COW_TOP_SPEED. The joystick wins over a drag, which wins over the keys.
+   * COW_TOP_SPEED. A drag in progress wins over the joystick, which wins over
+   * the keys. A drag cannot start while the joystick is in use (startDrag),
+   * but the joystick plugin claims any pointer that passes over it, so a drag
+   * toward the bottom-right corner must not hand the cow to the joystick.
    * @returns {{x: number, y: number}}
    */
   desiredCowVelocity: function () {
     var top = window.feedTheCow.Game.COW_TOP_SPEED;
     var stick = this.joystick.properties;
+    if (this.dragPointer) return this.dragVelocity(top);
     if (stick.inUse) {
       return { x: (stick.x / 100) * top, y: (stick.y / 100) * top };
     }
-    if (this.dragPointer) return this.dragVelocity(top);
     return this.keyVelocity(top);
   },
 
@@ -390,6 +394,7 @@ window.feedTheCow.Game.prototype = {
    * any display rate.
    */
   moveCow: function () {
+    if (this.dragPointer) this.stopAtDragPoint();
     var desired = this.desiredCowVelocity();
     var velocity = this.cow.body.velocity;
     var seconds = this.time.delta / 1000;
@@ -397,26 +402,27 @@ window.feedTheCow.Game.prototype = {
     var share = 1 - Math.exp(-seconds / response);
     velocity.x += (desired.x - velocity.x) * share;
     velocity.y += (desired.y - velocity.y) * share;
-    if (this.dragPointer) this.stopAtDragPoint(seconds);
   },
 
   /**
-   * On a long frame, one step of movement can carry the cow past the drag
-   * point before the easing slows it. Cap the speed so this frame's step
-   * ends on the point at most.
-   * @param {number} seconds - This frame's length
+   * Phaser has already moved the body by this frame's velocity and length
+   * (stage.preUpdate runs before update), and writes the step to the sprite
+   * after update. If that step carried the cow past the drag point, as a long
+   * frame can, shorten it to end on the point and stop the cow there.
    */
-  stopAtDragPoint: function (seconds) {
-    var velocity = this.cow.body.velocity;
+  stopAtDragPoint: function () {
+    var body = this.cow.body;
     var dx = this.dragPointer.worldX - this.dragGrab.x - this.cow.x;
     var dy = this.dragPointer.worldY - this.dragGrab.y - this.cow.y;
-    var distance = Math.sqrt(dx * dx + dy * dy);
-    var speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-    if (seconds <= 0 || speed * seconds <= distance) return;
+    var stepX = body.deltaX();
+    var stepY = body.deltaY();
+    var along = stepX * dx + stepY * dy;
+    if (along <= dx * dx + dy * dy) return;
 
-    var scale = distance / (speed * seconds);
-    velocity.x *= scale;
-    velocity.y *= scale;
+    body.position.x = body.prev.x + dx;
+    body.position.y = body.prev.y + dy;
+    body.velocity.x = 0;
+    body.velocity.y = 0;
   },
 
   /**

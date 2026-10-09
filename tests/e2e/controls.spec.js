@@ -213,6 +213,17 @@ test.describe("drag", () => {
     expect(start.y - end.y).toBeGreaterThan(80);
   });
 
+  test("a drag that passes over the joystick keeps steering the cow", async ({ page, isMobile }) => {
+    await quietGame(page);
+    const start = await cowPosition(page);
+    // Released inside the joystick circle (centre 860, 450, radius 50), which
+    // the joystick plugin claims for any pointer held down there.
+    await drag(page, isMobile, [start.x + 80, start.y + 45], [850, 445], { holdMs: 1500 });
+    const end = await cowPosition(page);
+    expect(end.x - start.x).toBeGreaterThan(200);
+    expect(end.y - start.y).toBeGreaterThan(100);
+  });
+
   test("a drag top to bottom takes time, never faster than top speed", async ({ page, isMobile }) => {
     await quietGame(page);
     await page.evaluate(() => {
@@ -224,11 +235,13 @@ test.describe("drag", () => {
     const track = await trackCow(page, () =>
       drag(page, isMobile, [380, 45], [380, 485], { holdMs: 2500 })
     );
-    const pressedAt = track[0].t;
+    // Time from the cow's first movement, not from before the press: the drag
+    // helper holds still for 100 ms first.
+    const started = track.find((p) => p.y > track[0].y + 2);
     const arrived = track.find((p) => p.y >= 430);
     expect(arrived, "cow reached the bottom").toBeTruthy();
-    // 440 px at 450 px/s is 0.98 s before any easing in or out.
-    expect((arrived.t - pressedAt) / 1000).toBeGreaterThan(0.9);
+    // 428 px at 450 px/s is 0.95 s before any easing in or out.
+    expect((arrived.t - started.t) / 1000).toBeGreaterThan(0.9);
     expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.08);
   });
 
@@ -255,27 +268,37 @@ test.describe("drag", () => {
 
   test("a long frame never carries the dragged cow past the drag point", async ({ page }) => {
     await quietGame(page);
-    const step = await page.evaluate(() => {
+    await page.evaluate(() => {
       const game = window.__game;
       const state = game.state.getCurrentState();
-      // A drag point 10 px above the cow, the cow already at top speed toward
-      // it, and one 200 ms frame (Phaser's longest).
+      // Phaser moves the body by a frame's velocity and length before update
+      // runs, so the velocity eased in one frame is applied with the next
+      // frame's length. Feed a normal frame, then Phaser's longest (200 ms),
+      // with the cow at top speed 10 px short of the drag point.
+      window.__frames = [1000 / 60, 200, 1000 / 60, 1000 / 60, 1000 / 60, 1000 / 60];
+      window.__cowY = [];
+      const preUpdate = game.time.preUpdate;
+      game.time.preUpdate = function (delta) {
+        window.__cowY.push(state.cow.y);
+        const forced = window.__frames.shift();
+        return preUpdate.call(this, forced === undefined ? delta : forced / 1000);
+      };
+      window.__target = state.cow.y - 10;
       state.dragGrab = { x: 0, y: 0 };
-      state.dragPointer = { worldX: state.cow.x, worldY: state.cow.y - 10 };
+      state.dragPointer = { worldX: state.cow.x, worldY: window.__target };
       state.cow.body.velocity.x = 0;
       state.cow.body.velocity.y = -window.feedTheCow.Game.COW_TOP_SPEED;
-      const delta = Object.getOwnPropertyDescriptor(game.time, "delta");
-      Object.defineProperty(game.time, "delta", { value: 200, configurable: true, writable: true });
-      state.moveCow();
-      if (delta) Object.defineProperty(game.time, "delta", delta);
-      else delete game.time.delta;
-      const travel = -state.cow.body.velocity.y * 0.2;
+    });
+    await page.waitForFunction(() => window.__frames.length === 0 && window.__cowY.length > 7);
+    const run = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
       state.dragPointer = null;
       state.dragGrab = null;
-      return { travel, distance: 10 };
+      return { target: window.__target, ys: window.__cowY.slice(1) };
     });
-    expect(step.travel).toBeLessThanOrEqual(step.distance + 0.01);
-    expect(step.travel).toBeGreaterThan(0);
+    // Lower y is further up, toward and past the point.
+    expect(Math.min(...run.ys)).toBeGreaterThanOrEqual(run.target - 0.5);
+    expect(run.ys[run.ys.length - 1]).toBeLessThanOrEqual(run.target + 1);
   });
 });
 
