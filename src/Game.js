@@ -22,6 +22,9 @@ window.feedTheCow.Game = function (game) {
   this.scoreText = null;
   this.lastInjectionSpawnTime = 0;
   this.cursors = null;
+  this.wasd = null;
+  this.dragPointer = null;
+  this.dragGrab = null;
   this.gamepad = null;
   this.joystick = null;
 };
@@ -109,9 +112,24 @@ window.feedTheCow.Game.SCROLL_SPEED_MULTIPLIER = 0.5;
 window.feedTheCow.Game.GROUND_SPEED_SCALE = 60;
 
 /**
- * Cow movement speed in pixels per second
+ * The cow's top speed in pixels per second, in any direction
  */
-window.feedTheCow.Game.COW_SPEED = 300;
+window.feedTheCow.Game.COW_TOP_SPEED = 450;
+
+/**
+ * How quickly the cow's speed eases toward what the player asks for, in
+ * seconds: after this long it has closed about 63% of the gap, after three
+ * times this about 95%. Smaller is snappier; it never jumps in one frame.
+ */
+window.feedTheCow.Game.COW_RESPONSE_TIME = 0.08;
+
+/**
+ * The cow's right edge stops here, not at the edge of the field. Injections
+ * appear at x = 960 and speed up as the game goes on: at the start this
+ * leaves about half a second to see one coming, a third of a second after
+ * 100 s. It also keeps the cow clear of the joystick.
+ */
+window.feedTheCow.Game.COW_FIELD_RIGHT = 720;
 
 /**
  * Frames per second of the cow's run animation (8 frames in cow-run.png)
@@ -152,6 +170,14 @@ window.feedTheCow.Game.prototype = {
     this.ouch = this.add.audio("hurt");
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys({
+      up: Phaser.KeyCode.W,
+      down: Phaser.KeyCode.S,
+      left: Phaser.KeyCode.A,
+      right: Phaser.KeyCode.D,
+    });
+    this.dragPointer = null;
+    this.dragGrab = null;
 
     this.buildWorld();
 
@@ -243,8 +269,9 @@ window.feedTheCow.Game.prototype = {
   },
 
   /**
-   * Creates and configures the cow sprite
-   * Enables drag controls for vertical movement only
+   * Creates and configures the cow sprite.
+   * Pressing on the cow starts a drag: the cow then eases toward the pointer
+   * (see desiredCowVelocity) instead of jumping to it.
    */
   buildCow: function () {
     this.cow = this.add.sprite(40, this.world.centerY - 50, "cow");
@@ -256,8 +283,154 @@ window.feedTheCow.Game.prototype = {
     // an injection nor collects grass.
     this.cow.body.setSize(120, 62, 32, 12);
     this.cow.body.collideWorldBounds = true;
-    this.cow.input.enableDrag();
-    this.cow.input.allowHorizontalDrag = false;
+    this.keepWholeCowInField();
+
+    this.cow.events.onInputDown.add(this.startDrag, this);
+    this.input.onUp.add(this.endDrag, this);
+  },
+
+  /**
+   * World-bounds collision works on the collision box, which is smaller than
+   * the drawing, so legs and horns could leave the field. Shrink the physics
+   * bounds by the box's margins inside the sprite so the whole sprite stays in,
+   * and stop at COW_FIELD_RIGHT on the right.
+   */
+  keepWholeCowInField: function () {
+    var body = this.cow.body;
+    var left = body.offset.x;
+    var top = body.offset.y;
+    var right = this.cow.width - body.offset.x - body.width;
+    var bottom = this.cow.height - body.offset.y - body.height;
+    var fieldRight = window.feedTheCow.Game.COW_FIELD_RIGHT;
+    this.physics.arcade.setBounds(
+      left,
+      top,
+      fieldRight - left - right,
+      this.world.height - top - bottom
+    );
+  },
+
+  /**
+   * Starts dragging the cow with the pointer that pressed it, remembering
+   * where on the cow it was grabbed.
+   * @param {Phaser.Sprite} cow - The cow sprite
+   * @param {Phaser.Pointer} pointer - The pointer that pressed it
+   */
+  startDrag: function (cow, pointer) {
+    if (this.joystick.properties.inUse) return;
+    this.dragPointer = pointer;
+    this.dragGrab = { x: pointer.worldX - cow.x, y: pointer.worldY - cow.y };
+  },
+
+  /**
+   * Ends a drag when the dragging pointer is released.
+   * @param {Phaser.Pointer} pointer - The pointer that was released
+   */
+  endDrag: function (pointer) {
+    if (pointer !== this.dragPointer) return;
+    this.dragPointer = null;
+    this.dragGrab = null;
+  },
+
+  /**
+   * The velocity the player is asking for, in pixels per second, capped at
+   * COW_TOP_SPEED. A drag in progress wins over the joystick, which wins over
+   * the keys. A drag cannot start while the joystick is in use (startDrag),
+   * but the joystick plugin claims any pointer that passes over it, so a drag
+   * toward the bottom-right corner must not hand the cow to the joystick.
+   * @returns {{x: number, y: number}}
+   */
+  desiredCowVelocity: function () {
+    var top = window.feedTheCow.Game.COW_TOP_SPEED;
+    var stick = this.joystick.properties;
+    if (this.dragPointer) return this.dragVelocity(top);
+    if (stick.inUse) {
+      return { x: (stick.x / 100) * top, y: (stick.y / 100) * top };
+    }
+    return this.keyVelocity(top);
+  },
+
+  /**
+   * Toward the drag point, at a speed proportional to the distance left and
+   * capped at top speed, so the cow slows as it arrives. The proportion is
+   * 1 / (4 x COW_RESPONSE_TIME): with the eased velocity in moveCow, that is
+   * critically damped, so the cow settles on the point without overshooting.
+   * @param {number} top - Top speed in pixels per second
+   * @returns {{x: number, y: number}}
+   */
+  dragVelocity: function (top) {
+    var dx = this.dragPointer.worldX - this.dragGrab.x - this.cow.x;
+    var dy = this.dragPointer.worldY - this.dragGrab.y - this.cow.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < 0.5) return { x: 0, y: 0 };
+
+    var perSecond = 1 / (4 * window.feedTheCow.Game.COW_RESPONSE_TIME);
+    var speed = Math.min(top, distance * perSecond);
+    return { x: (dx / distance) * speed, y: (dy / distance) * speed };
+  },
+
+  /**
+   * Arrow keys and WASD, with diagonals no faster than a single direction.
+   * @param {number} top - Top speed in pixels per second
+   * @returns {{x: number, y: number}}
+   */
+  keyVelocity: function (top) {
+    var keys = [this.cursors, this.wasd];
+    var held = function (direction) {
+      return keys.some(function (set) {
+        return set[direction].isDown;
+      });
+    };
+    var x = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
+    var y = (held("down") ? 1 : 0) - (held("up") ? 1 : 0);
+    var length = Math.sqrt(x * x + y * y) || 1;
+    return { x: (x / length) * top, y: (y / length) * top };
+  },
+
+  /**
+   * Eases the cow's velocity toward what the player asks for: each frame it
+   * closes the share of the gap that COW_RESPONSE_TIME allows for that frame's
+   * length, so it speeds up and slows down smoothly and behaves the same at
+   * any display rate.
+   */
+  moveCow: function () {
+    // Phaser resets pointers when the window regains focus and marks them up.
+    // A release over the canvas after that never fires input.onUp, so end the
+    // drag here instead. A drag still held through the focus change ends too.
+    if (this.dragPointer && this.dragPointer.isUp) this.endDrag(this.dragPointer);
+    if (this.dragPointer && this.stopAtDragPoint()) return;
+    var desired = this.desiredCowVelocity();
+    var velocity = this.cow.body.velocity;
+    var seconds = this.time.delta / 1000;
+    var response = window.feedTheCow.Game.COW_RESPONSE_TIME;
+    var share = 1 - Math.exp(-seconds / response);
+    velocity.x += (desired.x - velocity.x) * share;
+    velocity.y += (desired.y - velocity.y) * share;
+  },
+
+  /**
+   * Phaser has already moved the body by this frame's velocity and length
+   * (stage.preUpdate runs before update), and writes the step to the sprite
+   * after update. If that step carried the cow past the drag point, as a long
+   * frame can, shorten it to end on the point and stop the cow there. The
+   * sprite has not moved yet, so easing toward the point this frame would aim
+   * at where the cow was and leave it creeping on past.
+   * @returns {boolean} True if the cow was stopped on the point
+   */
+  stopAtDragPoint: function () {
+    var body = this.cow.body;
+    var dx = this.dragPointer.worldX - this.dragGrab.x - this.cow.x;
+    var dy = this.dragPointer.worldY - this.dragGrab.y - this.cow.y;
+    var stepX = body.deltaX();
+    var stepY = body.deltaY();
+    var along = stepX * dx + stepY * dy;
+    if (along <= dx * dx + dy * dy) return false;
+
+    body.position.x = body.prev.x + dx;
+    body.position.y = body.prev.y + dy;
+    body.velocity.x = 0;
+    body.velocity.y = 0;
+    return true;
   },
 
   /**
@@ -507,17 +680,7 @@ window.feedTheCow.Game.prototype = {
     );
 
     if (!this.gameOver) {
-      if (this.joystick.properties.inUse) {
-        this.cow.body.velocity.y =
-          (this.joystick.properties.y / 100) *
-          window.feedTheCow.Game.COW_SPEED;
-      } else if (this.cursors.up.isDown) {
-        this.cow.body.velocity.y = -window.feedTheCow.Game.COW_SPEED;
-      } else if (this.cursors.down.isDown) {
-        this.cow.body.velocity.y = window.feedTheCow.Game.COW_SPEED;
-      } else {
-        this.cow.body.velocity.y = 0;
-      }
+      this.moveCow();
 
       // Phaser CE updates once per display frame and moves bodies by the real
       // frame time (time.delta, ms), so the ground must scroll by it too, or it
@@ -551,6 +714,12 @@ window.feedTheCow.Game.prototype = {
       this.ouch.destroy();
       this.ouch = null;
     }
+
+    // The state change also resets input signals; removing it here keeps
+    // shutdown's cleanup complete on its own.
+    this.input.onUp.remove(this.endDrag, this);
+    this.dragPointer = null;
+    this.dragGrab = null;
 
     // Plugins belong to the game, not the state, so each run would add another.
     if (this.gamepad) {
