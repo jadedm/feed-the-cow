@@ -394,7 +394,7 @@ window.feedTheCow.Game.prototype = {
    * any display rate.
    */
   moveCow: function () {
-    if (this.dragPointer) this.stopAtDragPoint();
+    if (this.dragPointer && this.stopAtDragPoint()) return;
     var desired = this.desiredCowVelocity();
     var velocity = this.cow.body.velocity;
     var seconds = this.time.delta / 1000;
@@ -408,7 +408,10 @@ window.feedTheCow.Game.prototype = {
    * Phaser has already moved the body by this frame's velocity and length
    * (stage.preUpdate runs before update), and writes the step to the sprite
    * after update. If that step carried the cow past the drag point, as a long
-   * frame can, shorten it to end on the point and stop the cow there.
+   * frame can, shorten it to end on the point and stop the cow there. The
+   * sprite has not moved yet, so easing toward the point this frame would aim
+   * at where the cow was and leave it creeping on past.
+   * @returns {boolean} True if the cow was stopped on the point
    */
   stopAtDragPoint: function () {
     var body = this.cow.body;
@@ -417,12 +420,13 @@ window.feedTheCow.Game.prototype = {
     var stepX = body.deltaX();
     var stepY = body.deltaY();
     var along = stepX * dx + stepY * dy;
-    if (along <= dx * dx + dy * dy) return;
+    if (along <= dx * dx + dy * dy) return false;
 
     body.position.x = body.prev.x + dx;
     body.position.y = body.prev.y + dy;
     body.velocity.x = 0;
     body.velocity.y = 0;
+    return true;
   },
 
   /**

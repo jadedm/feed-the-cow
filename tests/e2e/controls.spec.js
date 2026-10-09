@@ -1,6 +1,7 @@
 import { drag, expect, openGame, simulateDisplayHz, startGameDirectly, test } from "./helpers.js";
 
 const TOP_SPEED = 450;
+const RESPONSE_TIME = 0.08;
 
 // Starts a game with nothing that can end it: no injections, no timer.
 async function quietGame(page) {
@@ -12,6 +13,22 @@ async function quietGame(page) {
     state.injectionGroup.forEachAlive((j) => j.kill());
     state.cow.x = 200;
     state.cow.y = 220;
+  });
+}
+
+// Records, for every game frame, its length in ms and the cow's x velocity at
+// the end of it, as window.__frames. Phaser applies a frame's length in
+// time.preUpdate, so the record is taken just before the next one.
+async function recordFrames(page) {
+  await page.evaluate(() => {
+    const game = window.__game;
+    const cow = game.state.getCurrentState().cow;
+    window.__frames = [];
+    const preUpdate = game.time.preUpdate;
+    game.time.preUpdate = function (delta) {
+      window.__frames.push({ ms: this.delta, v: cow.body.velocity.x });
+      return preUpdate.call(this, delta);
+    };
   });
 }
 
@@ -111,15 +128,19 @@ test.describe("keys", () => {
   test("a key press accelerates the cow instead of jumping to top speed", async ({ page, isMobile }) => {
     test.skip(isMobile, "no keyboard on the phone profile");
     await quietGame(page);
+    await recordFrames(page);
     await page.keyboard.down("ArrowRight");
-    await page.waitForTimeout(60);
-    const early = await page.evaluate(() => window.__game.state.getCurrentState().cow.body.velocity.x);
-    await page.waitForTimeout(400);
-    const later = await page.evaluate(() => window.__game.state.getCurrentState().cow.body.velocity.x);
+    await page.waitForTimeout(500);
+    const frames = await page.evaluate(() => window.__frames);
     await page.keyboard.up("ArrowRight");
-    expect(early).toBeGreaterThan(0);
-    expect(early).toBeLessThan(TOP_SPEED * 0.9);
-    expect(later).toBeGreaterThan(TOP_SPEED * 0.95);
+    // The first frame that moves the cow closes only the share of the gap its
+    // own length allows, whatever that length was on this runner.
+    const first = frames.findIndex((f) => f.v > 0);
+    expect(first).toBeGreaterThan(0);
+    const { ms, v } = frames[first];
+    expect(v).toBeCloseTo(TOP_SPEED * (1 - Math.exp(-ms / 1000 / RESPONSE_TIME)), 0);
+    expect(v).toBeLessThan(TOP_SPEED * 0.9);
+    expect(frames[frames.length - 1].v).toBeGreaterThan(TOP_SPEED * 0.95);
   });
 
   test("released keys ease the cow to a stop, not an instant halt", async ({ page, isMobile }) => {
@@ -127,25 +148,19 @@ test.describe("keys", () => {
     await quietGame(page);
     await page.keyboard.down("ArrowRight");
     await page.waitForTimeout(500);
-    await page.evaluate(() => {
-      window.__afterRelease = [];
-      window.__sampling = true;
-      const sample = () => {
-        window.__afterRelease.push(window.__game.state.getCurrentState().cow.body.velocity.x);
-        if (window.__sampling) requestAnimationFrame(sample);
-      };
-      requestAnimationFrame(sample);
-    });
+    await recordFrames(page);
     await page.keyboard.up("ArrowRight");
     await page.waitForTimeout(600);
-    const speeds = await page.evaluate(() => {
-      window.__sampling = false;
-      return window.__afterRelease;
-    });
-    const firstFall = speeds.findIndex((v, i) => i > 0 && v < speeds[i - 1] - 1);
+    const frames = await page.evaluate(() => window.__frames);
+    // The first slower frame keeps the share of the speed its own length
+    // allows, so the cow glides instead of halting.
+    const firstFall = frames.findIndex((f, i) => i > 0 && f.v < frames[i - 1].v - 1);
     expect(firstFall).toBeGreaterThan(0);
-    expect(speeds[firstFall]).toBeGreaterThan(TOP_SPEED * 0.3);
-    expect(speeds[speeds.length - 1]).toBeLessThan(TOP_SPEED * 0.05);
+    const { ms, v } = frames[firstFall];
+    const before = frames[firstFall - 1].v;
+    expect(v).toBeCloseTo(before * Math.exp(-ms / 1000 / RESPONSE_TIME), 0);
+    expect(v).toBeGreaterThan(0);
+    expect(frames[frames.length - 1].v).toBeLessThan(TOP_SPEED * 0.05);
   });
 
   test("the whole cow stays in its part of the field against every edge", async ({ page, isMobile }) => {
@@ -273,9 +288,10 @@ test.describe("drag", () => {
       const state = game.state.getCurrentState();
       // Phaser moves the body by a frame's velocity and length before update
       // runs, so the velocity eased in one frame is applied with the next
-      // frame's length. Feed a normal frame, then Phaser's longest (200 ms),
-      // with the cow at top speed 10 px short of the drag point.
-      window.__frames = [1000 / 60, 200, 1000 / 60, 1000 / 60, 1000 / 60, 1000 / 60];
+      // frame's length. Feed a normal frame, then Phaser's longest (200 ms)
+      // twice, as on a slow runner, with the cow at top speed 10 px short of
+      // the drag point.
+      window.__frames = [1000 / 60, 200, 200, 200, 1000 / 60, 1000 / 60];
       window.__cowY = [];
       const preUpdate = game.time.preUpdate;
       game.time.preUpdate = function (delta) {
@@ -297,7 +313,7 @@ test.describe("drag", () => {
       return { target: window.__target, ys: window.__cowY.slice(1) };
     });
     // Lower y is further up, toward and past the point.
-    expect(Math.min(...run.ys)).toBeGreaterThanOrEqual(run.target - 0.5);
+    expect(Math.min(...run.ys), `cow y per frame ${run.ys.join(", ")}`).toBeGreaterThanOrEqual(run.target - 0.5);
     expect(run.ys[run.ys.length - 1]).toBeLessThanOrEqual(run.target + 1);
   });
 });
