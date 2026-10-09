@@ -32,27 +32,37 @@ async function recordFrames(page) {
   });
 }
 
-// Samples the cow's position every animation frame while `action` runs.
+// Samples the cow's position once per game frame while `action` runs, with
+// `t` in game time (ms): the sum of the frame lengths Phaser moved the cow by.
+// Page timestamps from a separate animation-frame loop can land before or
+// after the game's update, which on a slow runner counts a whole extra frame
+// of movement in a window and inflates the measured speed (#46).
 async function trackCow(page, action) {
   await page.evaluate(() => {
+    const game = window.__game;
+    const preUpdate = game.time.preUpdate;
     window.__track = [];
-    window.__tracking = true;
-    const sample = () => {
-      const cow = window.__game.state.getCurrentState().cow;
-      window.__track.push({ t: performance.now(), x: cow.x, y: cow.y });
-      if (window.__tracking) requestAnimationFrame(sample);
+    window.__trackT = 0;
+    window.__stopTracking = () => {
+      game.time.preUpdate = preUpdate;
     };
-    requestAnimationFrame(sample);
+    // Runs before Phaser moves anything this frame, so the position is where
+    // the last frame left the cow, and this.delta is that frame's length.
+    game.time.preUpdate = function (delta) {
+      const cow = game.state.getCurrentState().cow;
+      if (window.__track.length) window.__trackT += this.delta;
+      window.__track.push({ t: window.__trackT, x: cow.x, y: cow.y });
+      return preUpdate.call(this, delta);
+    };
   });
   await action();
   return page.evaluate(() => {
-    window.__tracking = false;
+    window.__stopTracking();
     return window.__track;
   });
 }
 
-// Highest speed between samples at least 100 ms apart, in px/s. Shorter
-// windows pick up frame-timing jitter rather than real speed.
+// Highest speed between samples at least 100 ms of game time apart, in px/s.
 function peakSpeed(track) {
   let peak = 0;
   let last = track[0];
