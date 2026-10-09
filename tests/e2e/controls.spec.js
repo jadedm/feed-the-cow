@@ -1,4 +1,4 @@
-import { drag, expect, openGame, simulateDisplayHz, startGameDirectly, test } from "./helpers.js";
+import { drag, expect, gamePoint, openGame, simulateDisplayHz, startGameDirectly, test } from "./helpers.js";
 
 const TOP_SPEED = 450;
 const RESPONSE_TIME = 0.08;
@@ -146,6 +146,11 @@ test.describe("keys", () => {
   test("released keys ease the cow to a stop, not an instant halt", async ({ page, isMobile }) => {
     test.skip(isMobile, "no keyboard on the phone profile");
     await quietGame(page);
+    // Start at the left edge so the cow cannot reach the right one, where the
+    // bounds would stop it dead, even on a slow runner.
+    await page.evaluate(() => {
+      window.__game.state.getCurrentState().cow.x = 0;
+    });
     await page.keyboard.down("ArrowRight");
     await page.waitForTimeout(500);
     await recordFrames(page);
@@ -228,6 +233,24 @@ test.describe("drag", () => {
     expect(start.y - end.y).toBeGreaterThan(80);
   });
 
+  test("a drag ends on release even after Phaser resets its pointers", async ({ page, isMobile }) => {
+    test.skip(isMobile, "mouse");
+    await quietGame(page);
+    const start = await cowPosition(page);
+    const [x, y] = await gamePoint(page, start.x + 80, start.y + 45);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.waitForTimeout(150);
+    const dragging = await page.evaluate(() => !!window.__game.state.getCurrentState().dragPointer);
+    // What Phaser does when the window regains focus (Game#gameResumed).
+    await page.evaluate(() => window.__game.input.reset());
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+    const after = await page.evaluate(() => !!window.__game.state.getCurrentState().dragPointer);
+    expect(dragging).toBe(true);
+    expect(after).toBe(false);
+  });
+
   test("a drag that passes over the joystick keeps steering the cow", async ({ page, isMobile }) => {
     await quietGame(page);
     const start = await cowPosition(page);
@@ -289,7 +312,7 @@ test.describe("drag", () => {
       // Phaser moves the body by a frame's velocity and length before update
       // runs, so the velocity eased in one frame is applied with the next
       // frame's length. Feed a normal frame, then Phaser's longest (200 ms)
-      // twice, as on a slow runner, with the cow at top speed 10 px short of
+      // three times, as on a slow runner, with the cow at top speed 10 px short of
       // the drag point.
       window.__frames = [1000 / 60, 200, 200, 200, 1000 / 60, 1000 / 60];
       window.__cowY = [];
