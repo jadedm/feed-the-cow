@@ -55,11 +55,12 @@ async function trackCow(page, action) {
       return preUpdate.call(this, delta);
     };
   });
-  await action();
-  return page.evaluate(() => {
-    window.__stopTracking();
-    return window.__track;
-  });
+  try {
+    await action();
+  } finally {
+    await page.evaluate(() => window.__stopTracking());
+  }
+  return page.evaluate(() => window.__track);
 }
 
 // Highest speed between samples at least 100 ms of game time apart, in px/s.
@@ -132,7 +133,7 @@ test.describe("keys", () => {
     });
     const peak = peakSpeed(track);
     expect(peak).toBeGreaterThan(TOP_SPEED * 0.9);
-    expect(peak).toBeLessThan(TOP_SPEED * 1.08);
+    expect(peak).toBeLessThan(TOP_SPEED * 1.03);
   });
 
   test("a key press accelerates the cow instead of jumping to top speed", async ({ page, isMobile }) => {
@@ -290,7 +291,7 @@ test.describe("drag", () => {
     expect(arrived, "cow reached the bottom").toBeTruthy();
     // 428 px at 450 px/s is 0.95 s before any easing in or out.
     expect((arrived.t - started.t) / 1000).toBeGreaterThan(0.9);
-    expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.08);
+    expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.03);
   });
 
   test("the cow eases to a stop on the drag point without overshooting", async ({ page, isMobile }) => {
@@ -308,10 +309,13 @@ test.describe("drag", () => {
     expect(Math.abs(final.x - target.x)).toBeLessThan(3);
     expect(overshootY).toBeLessThan(2);
     expect(overshootX).toBeLessThan(2);
-    // Slowing down near the point: the last 60 px take longer than 60 px at top speed.
-    const at60 = track.find((p) => p.y <= target.y + 60);
-    const at5 = track.find((p) => p.y <= target.y + 5);
-    expect((at5.t - at60.t) / 1000).toBeGreaterThan(55 / TOP_SPEED);
+    // Slowing down near the point: from 60 px away to 5 px away takes about
+    // ln(60 / 5) x 4 x 0.08 = 0.8 s of game time with the easing, and 0.12 s
+    // at a constant top speed.
+    const away = (p) => Math.hypot(p.x - target.x, p.y - target.y);
+    const at60 = track.find((p) => away(p) <= 60);
+    const at5 = track.find((p) => away(p) <= 5);
+    expect((at5.t - at60.t) / 1000).toBeGreaterThan(0.4);
   });
 
   test("a long frame never carries the dragged cow past the drag point", async ({ page }) => {
