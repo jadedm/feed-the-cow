@@ -193,6 +193,55 @@ test.describe("items", () => {
     expect(result).toEqual({ landedOnAnother: 0, notMoved: 0 });
   });
 
+  test("grass spawns only below the sky and within the cow's reach", async ({ page }) => {
+    await openGame(page);
+    await startGameDirectly(page);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.timer.pause();
+      const ys = state.grassGroup.children.map((g) => g.y);
+      for (let i = 0; i < 300; i++) {
+        state.grassGroup.children.forEach((g) => {
+          state.respawnGrass(g);
+          ys.push(g.y);
+        });
+      }
+      return ys;
+    });
+    // The sky in the field image reaches y 105; the cow's box reaches y 514,
+    // so a 30 px tall grass must start between 110 and 484.
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(110);
+    expect(Math.max(...ys) + 30).toBeLessThanOrEqual(514);
+    // The whole band is used, not a sliver of it.
+    expect(Math.min(...ys)).toBeLessThan(130);
+    expect(Math.max(...ys)).toBeGreaterThan(464);
+  });
+
+  test("the cow at its lowest eats grass at the lowest spawn line", async ({ page }) => {
+    await openGame(page);
+    await startGameDirectly(page);
+    await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.timer.pause();
+      state.injectionGroup.forEachAlive((j) => j.kill());
+      state.cow.x = 200;
+      state.cow.y = 1000;
+    });
+    // One frame for the field bounds to pull the cow back to its lowest.
+    await page.waitForTimeout(100);
+    const result = await page.evaluate(async () => {
+      const state = window.__game.state.getCurrentState();
+      const lowest = state.cow.y;
+      const before = state.score;
+      const grass = state.grassGroup.getFirstAlive();
+      grass.reset(state.cow.x + 60, window.feedTheCow.Game.SPAWN_Y_MAX_GRASS);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      return { lowest, gained: state.score - before };
+    });
+    expect(result.lowest).toBe(440);
+    expect(result.gained).toBeGreaterThan(0);
+  });
+
   test("every grass scrolls off the left and comes back on the right", async ({ page }) => {
     await openGame(page);
     await startGameDirectly(page);

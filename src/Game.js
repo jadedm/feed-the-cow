@@ -55,14 +55,24 @@ window.feedTheCow.Game.SPAWN_X_MIN = 960;
 window.feedTheCow.Game.SPAWN_X_MAX = 2500;
 
 /**
- * Minimum Y position for spawning game objects
+ * Minimum Y position for spawning injections
  */
 window.feedTheCow.Game.SPAWN_Y_MIN = 0;
 
 /**
- * Maximum Y position for spawning grass
+ * Highest grass can spawn (smallest top edge): just below the sky in the
+ * field image, which reaches y 105 (the hills start at HORIZON, y 96, in
+ * art/build-art.mjs, and dip up to 10 px), so no grass floats in the sky.
  */
-window.feedTheCow.Game.SPAWN_Y_MAX_GRASS = 530;
+window.feedTheCow.Game.SPAWN_Y_MIN_GRASS = 110;
+
+/**
+ * Lowest grass can spawn (largest top edge): the 30 px tall grass then ends
+ * at y 514, the bottom of the cow's collision box when the cow is as low as
+ * it can go (sprite y 440, body offset 12, body height 62), so the cow can
+ * always reach it.
+ */
+window.feedTheCow.Game.SPAWN_Y_MAX_GRASS = 484;
 
 /**
  * Maximum Y position for spawning injections
@@ -232,6 +242,7 @@ window.feedTheCow.Game.prototype = {
         j,
         window.feedTheCow.Game.SPAWN_X_MIN,
         window.feedTheCow.Game.SPAWN_X_MAX,
+        window.feedTheCow.Game.SPAWN_Y_MIN,
         window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
       );
 
@@ -447,6 +458,7 @@ window.feedTheCow.Game.prototype = {
         g,
         xMin,
         xMin + 600,
+        window.feedTheCow.Game.SPAWN_Y_MIN_GRASS,
         window.feedTheCow.Game.SPAWN_Y_MAX_GRASS
       );
     }
@@ -513,11 +525,11 @@ window.feedTheCow.Game.prototype = {
    * @param {Phaser.Sprite} item - The item to place
    * @param {number} xMin - Leftmost spawn x
    * @param {number} xMax - Rightmost spawn x for a random spot
-   * @param {number} yMax - Lowest spawn y
+   * @param {number} yMin - Highest spawn y (smallest top edge)
+   * @param {number} yMax - Lowest spawn y (largest top edge)
    */
-  placeClear: function (item, xMin, xMax, yMax) {
+  placeClear: function (item, xMin, xMax, yMin, yMax) {
     var gap = window.feedTheCow.Game.ITEM_GAP;
-    var yMin = window.feedTheCow.Game.SPAWN_Y_MIN;
     var others = this.otherItems(item);
     var clashes = function (other) {
       return this.tooClose(item, other);
@@ -548,6 +560,7 @@ window.feedTheCow.Game.prototype = {
       g,
       window.feedTheCow.Game.SPAWN_X_MIN,
       window.feedTheCow.Game.SPAWN_X_MAX + 500,
+      window.feedTheCow.Game.SPAWN_Y_MIN_GRASS,
       window.feedTheCow.Game.SPAWN_Y_MAX_GRASS
     );
   },
@@ -564,6 +577,7 @@ window.feedTheCow.Game.prototype = {
         j,
         window.feedTheCow.Game.SPAWN_X_MIN,
         window.feedTheCow.Game.SPAWN_X_MAX,
+        window.feedTheCow.Game.SPAWN_Y_MIN,
         window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
       );
     }
@@ -580,6 +594,7 @@ window.feedTheCow.Game.prototype = {
       j,
       window.feedTheCow.Game.SPAWN_X_MIN,
       window.feedTheCow.Game.SPAWN_X_MAX,
+      window.feedTheCow.Game.SPAWN_Y_MIN,
       window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
     );
   },
