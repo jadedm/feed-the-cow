@@ -32,27 +32,39 @@ async function recordFrames(page) {
   });
 }
 
-// Samples the cow's position every animation frame while `action` runs.
+// Samples the cow's position once per game frame while `action` runs, with
+// `t` in game time (ms): the sum of the frame lengths Phaser moved the cow by.
+// Page timestamps from a separate animation-frame loop can land before or
+// after the game's update, which on a slow runner counts a whole extra frame
+// of movement in a window and inflates the measured speed (#46).
 async function trackCow(page, action) {
   await page.evaluate(() => {
+    const game = window.__game;
+    const preUpdate = game.time.preUpdate;
     window.__track = [];
-    window.__tracking = true;
-    const sample = () => {
-      const cow = window.__game.state.getCurrentState().cow;
-      window.__track.push({ t: performance.now(), x: cow.x, y: cow.y });
-      if (window.__tracking) requestAnimationFrame(sample);
+    window.__trackT = 0;
+    window.__stopTracking = () => {
+      game.time.preUpdate = preUpdate;
     };
-    requestAnimationFrame(sample);
+    // Runs before Phaser moves anything this frame, so the position is where
+    // the last frame left the cow, and this.delta is that frame's length.
+    game.time.preUpdate = function (delta) {
+      const cow = game.state.getCurrentState().cow;
+      if (window.__track.length) window.__trackT += this.delta;
+      window.__track.push({ t: window.__trackT, x: cow.x, y: cow.y });
+      return preUpdate.call(this, delta);
+    };
   });
-  await action();
-  return page.evaluate(() => {
-    window.__tracking = false;
-    return window.__track;
-  });
+  try {
+    await action();
+  } finally {
+    // A closed page needs no cleanup; do not let that hide the real error.
+    await page.evaluate(() => window.__stopTracking()).catch(() => {});
+  }
+  return page.evaluate(() => window.__track);
 }
 
-// Highest speed between samples at least 100 ms apart, in px/s. Shorter
-// windows pick up frame-timing jitter rather than real speed.
+// Highest speed between samples at least 100 ms of game time apart, in px/s.
 function peakSpeed(track) {
   let peak = 0;
   let last = track[0];
@@ -122,7 +134,7 @@ test.describe("keys", () => {
     });
     const peak = peakSpeed(track);
     expect(peak).toBeGreaterThan(TOP_SPEED * 0.9);
-    expect(peak).toBeLessThan(TOP_SPEED * 1.08);
+    expect(peak).toBeLessThan(TOP_SPEED * 1.03);
   });
 
   test("a key press accelerates the cow instead of jumping to top speed", async ({ page, isMobile }) => {
@@ -280,7 +292,7 @@ test.describe("drag", () => {
     expect(arrived, "cow reached the bottom").toBeTruthy();
     // 428 px at 450 px/s is 0.95 s before any easing in or out.
     expect((arrived.t - started.t) / 1000).toBeGreaterThan(0.9);
-    expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.08);
+    expect(peakSpeed(track)).toBeLessThan(TOP_SPEED * 1.03);
   });
 
   test("the cow eases to a stop on the drag point without overshooting", async ({ page, isMobile }) => {
@@ -298,10 +310,13 @@ test.describe("drag", () => {
     expect(Math.abs(final.x - target.x)).toBeLessThan(3);
     expect(overshootY).toBeLessThan(2);
     expect(overshootX).toBeLessThan(2);
-    // Slowing down near the point: the last 60 px take longer than 60 px at top speed.
-    const at60 = track.find((p) => p.y <= target.y + 60);
-    const at5 = track.find((p) => p.y <= target.y + 5);
-    expect((at5.t - at60.t) / 1000).toBeGreaterThan(55 / TOP_SPEED);
+    // Slowing down near the point: from 60 px away to 5 px away took 0.43 s of
+    // game time at 60 Hz and 0.31 s at 25 Hz (longer frames shorten it), and
+    // takes 0.12 s at a constant top speed.
+    const away = (p) => Math.hypot(p.x - target.x, p.y - target.y);
+    const at60 = track.find((p) => away(p) <= 60);
+    const at5 = track.find((p) => away(p) <= 5);
+    expect((at5.t - at60.t) / 1000).toBeGreaterThan(0.2);
   });
 
   test("a long frame never carries the dragged cow past the drag point", async ({ page }) => {
