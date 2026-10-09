@@ -394,8 +394,9 @@ window.feedTheCow.Game.prototype = {
    * any display rate.
    */
   moveCow: function () {
-    // Phaser resets pointers when the window regains focus, and a release
-    // after that never fires input.onUp, so end a drag whose pointer is up.
+    // Phaser resets pointers when the window regains focus and marks them up.
+    // A release over the canvas after that never fires input.onUp, so end the
+    // drag here instead. A drag still held through the focus change ends too.
     if (this.dragPointer && this.dragPointer.isUp) this.endDrag(this.dragPointer);
     if (this.dragPointer && this.stopAtDragPoint()) return;
     var desired = this.desiredCowVelocity();

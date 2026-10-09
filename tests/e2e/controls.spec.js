@@ -233,7 +233,7 @@ test.describe("drag", () => {
     expect(start.y - end.y).toBeGreaterThan(80);
   });
 
-  test("a drag ends on release even after Phaser resets its pointers", async ({ page, isMobile }) => {
+  test("a drag ends once Phaser resets its pointers, so a later release cannot strand it", async ({ page, isMobile }) => {
     test.skip(isMobile, "mouse");
     await quietGame(page);
     const start = await cowPosition(page);
