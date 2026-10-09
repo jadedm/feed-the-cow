@@ -41,8 +41,8 @@ window.feedTheCow.Preloader.prototype = {
       100
     );
     this.load.audio("hurt", "src/audio/hurt.wav");
-    this.load.audio("select_audio", "src/audio/select.mp3");
-    this.load.audio("game_audio", "src/audio/bg.mp3");
+    this.load.audio("select_audio", "src/audio/select.wav");
+    this.load.audio("game_audio", "src/audio/music.wav");
   },
 
   create: function () {
