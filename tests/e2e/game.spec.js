@@ -232,14 +232,37 @@ test.describe("items", () => {
     const result = await page.evaluate(async () => {
       const state = window.__game.state.getCurrentState();
       const lowest = state.cow.y;
+      // Only the placed grass: others arriving from the right would add score.
+      state.grassGroup.forEachAlive((g) => g.kill());
       const before = state.score;
-      const grass = state.grassGroup.getFirstAlive();
+      const grass = state.grassGroup.getFirstDead();
       grass.reset(state.cow.x + 60, window.feedTheCow.Game.SPAWN_Y_MAX_GRASS);
       await new Promise((resolve) => setTimeout(resolve, 150));
       return { lowest, gained: state.score - before };
     });
     expect(result.lowest).toBe(440);
-    expect(result.gained).toBeGreaterThan(0);
+    expect(result.gained).toBe(10);
+  });
+
+  test("grass placed by the no-clear-spot fallback stays in the band too", async ({ page }) => {
+    await openGame(page);
+    await startGameDirectly(page);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.timer.pause();
+      // Every random spot clashes, so placeClear falls back to placing the
+      // grass right of everything else.
+      state.tooClose = () => true;
+      const ys = [];
+      for (let i = 0; i < 200; i++) {
+        const g = state.grassGroup.getFirstAlive();
+        state.respawnGrass(g);
+        ys.push(g.y);
+      }
+      return ys;
+    });
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(110);
+    expect(Math.max(...ys) + 30).toBeLessThanOrEqual(514);
   });
 
   test("every grass scrolls off the left and comes back on the right", async ({ page }) => {
