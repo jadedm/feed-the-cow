@@ -89,6 +89,28 @@ export async function openGame(page) {
     null,
     { timeout: 20_000 }
   );
+  await waitForSteadyCanvas(page);
+}
+
+// Phaser centres and sizes the canvas on a throttled check about 100 ms after
+// it boots, which can come after the start menu when assets load fast (#43).
+// Wait until the canvas has stayed in one place for a few frames, so clicks
+// computed from its position land where intended.
+async function waitForSteadyCanvas(page) {
+  await page.waitForFunction(
+    () => {
+      const r = document.querySelector("canvas").getBoundingClientRect();
+      const now = `${r.left},${r.top},${r.width}`;
+      const steady = window.__lastCanvas === now && performance.now() - window.__lastCanvasAt > 300;
+      if (window.__lastCanvas !== now) {
+        window.__lastCanvas = now;
+        window.__lastCanvasAt = performance.now();
+      }
+      return steady;
+    },
+    null,
+    { polling: 50, timeout: 10_000 }
+  );
 }
 
 // state.start() only switches on the next frame, so wait for the new game's
