@@ -1,8 +1,9 @@
-// Writes the SVG sources for the cow and field art into art/.
+// Writes the SVG source of every game image into art/.
 //
-// Run `node art/build-art.mjs`, then render each SVG to the PNG of the same
-// name in src/images/ (see art/README.md). Everything here is drawn in code,
-// so this art is covered by the MIT license with the rest of the code.
+// Run `node art/build-art.mjs`, then `node art/render-art.mjs`, which renders
+// each SVG to the PNG the game loads (the names differ for some; see
+// art/README.md). Everything here is drawn in code, so this art is covered by
+// the MIT license with the rest of the code.
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

@@ -1,10 +1,10 @@
 // Renders the SVGs in art/ to the PNGs the game loads, at their fixed sizes.
 // Run `node art/build-art.mjs` first. With no arguments every image is
 // rendered; name SVG files (`node art/render-art.mjs grass.svg title.svg`) to
-// render only those. Exits non-zero if the font does not load or a PNG comes
-// out at the wrong size.
+// render only those. Every image is rendered and checked before any file is
+// written, so a run that fails (font not loaded, wrong size) writes nothing.
 import { chromium } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -40,7 +40,8 @@ function pngSize(buffer) {
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
-let failed = false;
+const rendered = [];
+const problems = [];
 for (const name of names.length ? names : Object.keys(TARGETS)) {
   const target = TARGETS[name];
   const svg = readFileSync(join(ART, name), "utf8");
@@ -49,22 +50,32 @@ for (const name of names.length ? names : Object.keys(TARGETS)) {
     <style>html, body { margin: 0; background: transparent; }
     svg { display: block; position: absolute; left: 0; top: 0; }</style>
     </head><body>${svg}</body></html>`);
+  // document.fonts.check() is true when no Quicksand face exists at all, so
+  // look for loaded faces of both weights instead.
   const fontLoaded = await page.evaluate(async () => {
-    await document.fonts.load("700 20px Quicksand");
-    await document.fonts.load("400 20px Quicksand");
-    return document.fonts.check("700 20px Quicksand") && document.fonts.check("400 20px Quicksand");
+    await Promise.all([document.fonts.load("700 20px Quicksand"), document.fonts.load("400 20px Quicksand")]);
+    const loaded = [...document.fonts].filter(
+      (face) => face.family.replace(/["']/g, "") === "Quicksand" && face.status === "loaded"
+    );
+    return ["400", "700"].every((weight) => loaded.some((face) => face.weight === weight));
   });
   if (!fontLoaded) {
-    console.error(`${name}: Quicksand did not load, nothing written`);
-    failed = true;
+    problems.push(`${name}: Quicksand 400 and 700 did not both load`);
     break;
   }
-  const out = join(IMAGES, target.png);
-  const buffer = await page.locator("svg").screenshot({ path: out, omitBackground: target.transparent });
+  const buffer = await page.locator("svg").screenshot({ omitBackground: target.transparent });
   const size = pngSize(buffer);
   const ok = size.width === target.width && size.height === target.height;
-  if (!ok) failed = true;
-  console.log(`${name} -> src/images/${target.png} ${size.width}x${size.height}${ok ? "" : ` WRONG, want ${target.width}x${target.height}`}`);
+  if (!ok) problems.push(`${name}: rendered ${size.width}x${size.height}, want ${target.width}x${target.height}`);
+  rendered.push({ name, target, buffer, size });
 }
 await browser.close();
-process.exit(failed ? 1 : 0);
+
+if (problems.length) {
+  console.error(`Nothing written.\n${problems.join("\n")}`);
+  process.exit(1);
+}
+for (const { name, target, buffer, size } of rendered) {
+  writeFileSync(join(IMAGES, target.png), buffer);
+  console.log(`${name} -> src/images/${target.png} ${size.width}x${size.height}`);
+}
