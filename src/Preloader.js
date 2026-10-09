@@ -7,7 +7,7 @@ window.feedTheCow.Preloader = function (game) {
 
 /**
  * How long to wait for the music to decode before starting anyway, in ms.
- * Without a limit, a browser that cannot decode the MP3 never leaves this
+ * Without a limit, a browser that cannot decode the music never leaves this
  * screen.
  */
 window.feedTheCow.Preloader.DECODE_TIMEOUT_MS = 5000;
@@ -41,8 +41,8 @@ window.feedTheCow.Preloader.prototype = {
       100
     );
     this.load.audio("hurt", "src/audio/hurt.wav");
-    this.load.audio("select_audio", "src/audio/select.mp3");
-    this.load.audio("game_audio", "src/audio/bg.mp3");
+    this.load.audio("select_audio", "src/audio/select.wav");
+    this.load.audio("game_audio", "src/audio/music.wav");
   },
 
   create: function () {
