@@ -103,7 +103,9 @@ function hurt() {
     const envelope = Math.min(1, i / (0.005 * RATE)) * Math.pow(1 - t / length, 1.5);
     buffer[i] = (waves.square(phase) * 0.6 + noise() * 0.25) * envelope;
   }
-  return normalise(buffer, 0.75);
+  // As loud on average as the hurt sound it replaced, so it stays under the
+  // music, which the game plays at 0.3 volume.
+  return normalise(buffer, 0.14);
 }
 
 // A quick rising blip, for starting a game and trying again.
@@ -112,7 +114,8 @@ function select() {
   const buffer = new Float32Array(Math.round(length * RATE));
   addNote(buffer, 0, 0.07, midiToHz(76), 0.6, "square");
   addNote(buffer, 0.07, 0.09, midiToHz(84), 0.6, "square");
-  return normalise(buffer, 0.6);
+  // As loud on average as the select sound it replaced.
+  return normalise(buffer, 0.36);
 }
 
 function normalise(buffer, peak) {

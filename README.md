@@ -109,7 +109,7 @@ feed-the-cow/
 ├── screenshots/        # Images used in this README
 ├── index.html
 ├── main.js             # Creates the Phaser game and registers the states
-├── scripts/            # Build helpers: asset copy and asset check
+├── scripts/            # Sound generation, asset copy and asset check
 ├── tests/e2e/          # Playwright end-to-end tests against the build
 ├── .github/            # CI workflow, issue and PR templates
 ├── vite.config.js
