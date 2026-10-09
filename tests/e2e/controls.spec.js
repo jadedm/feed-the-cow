@@ -329,6 +329,11 @@ test.describe("drag", () => {
 
   test("the cow eases to a stop on the drag point without overshooting", async ({ page, isMobile }) => {
     await quietGame(page);
+    // Low enough that the point 150 px up stays below the sky (y 106).
+    await page.evaluate(() => {
+      window.__game.state.getCurrentState().cow.y = 300;
+    });
+    await page.waitForTimeout(100);
     const start = await cowPosition(page);
     // Diagonal, so the horizontal grab offset is checked as well as the vertical.
     const target = { x: start.x + 150, y: start.y - 150 };
