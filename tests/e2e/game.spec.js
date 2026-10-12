@@ -36,6 +36,66 @@ test.describe("boot and assets", () => {
   });
 });
 
+// Records the canvas rect and whether it is visible on every animation frame
+// from page load, and when the start menu appears.
+async function recordCanvas(page) {
+  await page.addInitScript(() => {
+    window.__canvasFrames = [];
+    const t0 = performance.now();
+    const sample = () => {
+      const canvas = document.querySelector("canvas");
+      if (canvas) {
+        const r = canvas.getBoundingClientRect();
+        window.__canvasFrames.push({
+          t: performance.now() - t0,
+          visible: getComputedStyle(canvas).visibility !== "hidden",
+          rect: [r.left, r.top, r.width, r.height].map(Math.round).join(","),
+          menu: !!(window.__game && window.__game.state.current === "StartMenu"),
+        });
+      }
+      if (performance.now() - t0 < 2000) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+}
+
+test.describe("canvas layout", () => {
+  for (const viewport of [null, { width: 600, height: 400 }]) {
+    test(`the canvas first shows already in place${viewport ? " in a 600x400 window" : ""}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await recordCanvas(page);
+      await page.goto("/");
+      await page.waitForFunction(() => window.__canvasFrames.length && performance.now() > 2100);
+      const frames = await page.evaluate(() => window.__canvasFrames);
+      const shown = frames.filter((f) => f.visible);
+      const final = frames[frames.length - 1].rect;
+      // One rect from the first visible frame on: no jump from the corner (#43).
+      expect([...new Set(shown.map((f) => f.rect))]).toEqual([final]);
+      // Shown before the start menu, and in place when it appears.
+      expect(shown[0].menu).toBe(false);
+      expect(shown.find((f) => f.menu).rect).toBe(final);
+      // Centred and within the 480 to 960 size limits. A phone widens its
+      // layout viewport to fit the page, so compare with the page's own size.
+      const [left, top, width, height] = final.split(",").map(Number);
+      const size = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      expect(width).toBeGreaterThanOrEqual(480);
+      expect(width).toBeLessThanOrEqual(960);
+      expect(Math.abs(left * 2 + width - size.width)).toBeLessThanOrEqual(2);
+      if (height < size.height) expect(Math.abs(top * 2 + height - size.height)).toBeLessThanOrEqual(2);
+    });
+  }
+
+  test("the canvas re-centres when the window is resized", async ({ page, isMobile }) => {
+    test.skip(isMobile, "fixed phone viewport");
+    await openGame(page);
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.waitForFunction(() => {
+      const r = document.querySelector("canvas").getBoundingClientRect();
+      return Math.abs(r.left * 2 + r.width - 1400) <= 2 && Math.abs(r.top * 2 + r.height - 900) <= 2;
+    });
+  });
+});
+
 test.describe("cow", () => {
   test("plays all eight run frames", async ({ page }) => {
     await openGame(page);
