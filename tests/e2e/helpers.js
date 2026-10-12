@@ -93,7 +93,7 @@ export async function openGame(page) {
 }
 
 // Since #43 the canvas is laid out before it first shows, so this normally
-// returns at once. It stays as a guard: Phaser re-lays the canvas out on its
+// returns after its minimum 300 ms settle. It stays as a guard: Phaser re-lays the canvas out on its
 // own throttled check after any change in window size. Wait until the canvas
 // has stayed in one place for a few frames, so clicks computed from its
 // position land where intended.
