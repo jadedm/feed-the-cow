@@ -55,9 +55,12 @@ window.feedTheCow.Game.SPAWN_X_MIN = 960;
 window.feedTheCow.Game.SPAWN_X_MAX = 2500;
 
 /**
- * Minimum Y position for spawning injections
+ * Highest an injection can spawn (smallest top edge): under the sky, which
+ * reaches y 105, so every injection is a threat. At 110 the 13 px tall
+ * injection reaches 5 px into the cow's collision box at its highest (y 118,
+ * COW_FIELD_TOP 106 plus the body offset 12).
  */
-window.feedTheCow.Game.SPAWN_Y_MIN = 0;
+window.feedTheCow.Game.SPAWN_Y_MIN_INJECTION = 110;
 
 /**
  * Highest grass can spawn (smallest top edge): just below the sky in the
@@ -75,7 +78,8 @@ window.feedTheCow.Game.SPAWN_Y_MIN_GRASS = 110;
 window.feedTheCow.Game.SPAWN_Y_MAX_GRASS = 484;
 
 /**
- * Maximum Y position for spawning injections
+ * Lowest an injection can spawn (largest top edge): it then ends at y 513,
+ * inside the cow's collision box at its lowest (y 514).
  */
 window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION = 500;
 
@@ -260,7 +264,7 @@ window.feedTheCow.Game.prototype = {
         j,
         window.feedTheCow.Game.SPAWN_X_MIN,
         window.feedTheCow.Game.SPAWN_X_MAX,
-        window.feedTheCow.Game.SPAWN_Y_MIN,
+        window.feedTheCow.Game.SPAWN_Y_MIN_INJECTION,
         window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
       );
 
@@ -599,7 +603,7 @@ window.feedTheCow.Game.prototype = {
         j,
         window.feedTheCow.Game.SPAWN_X_MIN,
         window.feedTheCow.Game.SPAWN_X_MAX,
-        window.feedTheCow.Game.SPAWN_Y_MIN,
+        window.feedTheCow.Game.SPAWN_Y_MIN_INJECTION,
         window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
       );
     }
@@ -616,7 +620,7 @@ window.feedTheCow.Game.prototype = {
       j,
       window.feedTheCow.Game.SPAWN_X_MIN,
       window.feedTheCow.Game.SPAWN_X_MAX,
-      window.feedTheCow.Game.SPAWN_Y_MIN,
+      window.feedTheCow.Game.SPAWN_Y_MIN_INJECTION,
       window.feedTheCow.Game.SPAWN_Y_MAX_INJECTION
     );
   },
