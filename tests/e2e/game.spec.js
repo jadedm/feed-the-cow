@@ -37,7 +37,8 @@ test.describe("boot and assets", () => {
 });
 
 // Records the canvas rect and whether it is visible on every animation frame
-// from page load, and when the start menu appears.
+// from page load until half a second after the start menu appears (at most
+// 15 s), as window.__canvasFrames; window.__canvasDone is set when it stops.
 async function recordCanvas(page) {
   await page.addInitScript(() => {
     window.__canvasFrames = [];
@@ -53,7 +54,13 @@ async function recordCanvas(page) {
           menu: !!(window.__game && window.__game.state.current === "StartMenu"),
         });
       }
-      if (performance.now() - t0 < 2000) requestAnimationFrame(sample);
+      const menuAt = window.__canvasFrames.find((f) => f.menu);
+      const elapsed = performance.now() - t0;
+      if ((menuAt && elapsed > menuAt.t + 500) || elapsed > 15000) {
+        window.__canvasDone = true;
+        return;
+      }
+      requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
   });
@@ -65,17 +72,19 @@ test.describe("canvas layout", () => {
       if (viewport) await page.setViewportSize(viewport);
       await recordCanvas(page);
       await page.goto("/");
-      await page.waitForFunction(() => window.__canvasFrames.length && performance.now() > 2100);
+      await page.waitForFunction(() => window.__canvasDone, null, { timeout: 20_000 });
       const frames = await page.evaluate(() => window.__canvasFrames);
       const shown = frames.filter((f) => f.visible);
+      expect(shown.some((f) => f.menu), "start menu appeared while recording").toBe(true);
       const final = frames[frames.length - 1].rect;
       // One rect from the first visible frame on: no jump from the corner (#43).
       expect([...new Set(shown.map((f) => f.rect))]).toEqual([final]);
       // Shown before the start menu, and in place when it appears.
       expect(shown[0].menu).toBe(false);
       expect(shown.find((f) => f.menu).rect).toBe(final);
-      // Centred and within the 480 to 960 size limits. A phone widens its
-      // layout viewport to fit the page, so compare with the page's own size.
+      // Centred and within the 480 to 960 size limits. Compare with the page's
+      // innerWidth and innerHeight, which Phaser itself centres against on a
+      // phone, rather than Playwright's configured viewport size.
       const [left, top, width, height] = final.split(",").map(Number);
       const size = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
       expect(width).toBeGreaterThanOrEqual(480);

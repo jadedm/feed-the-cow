@@ -4,7 +4,7 @@ import "./src/StartMenu.js";
 import "./src/Game.js";
 
 // Phaser lays the canvas out on its first frame, before any state runs, and
-// checks again only 100 ms or more later. Setting scaling and centring here,
+// then only on a throttled check (200 ms later, backing off to 2 s). Setting scaling and centring here,
 // right after boot, makes that first layout the final one; the canvas stays
 // hidden until Boot starts, which is after that layout (#43).
 function layOutBeforeFirstFrame(game) {
