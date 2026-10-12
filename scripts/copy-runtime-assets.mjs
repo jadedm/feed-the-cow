@@ -13,6 +13,9 @@ const RUNTIME_PATHS = [
   "src/libs/phaser.min.js",
   "src/libs/THIRD-PARTY-LICENSES.txt",
   "src/libs/plugins",
+  // The font itself is bundled by Vite from src/css/style.css; its license
+  // must ship with it.
+  "src/fonts/OFL.txt",
 ];
 
 for (const path of RUNTIME_PATHS) {

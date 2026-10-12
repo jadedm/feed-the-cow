@@ -92,10 +92,11 @@ export async function openGame(page) {
   await waitForSteadyCanvas(page);
 }
 
-// Phaser centres and sizes the canvas on a throttled check about 100 ms after
-// it boots, which can come after the start menu when assets load fast (#43).
-// Wait until the canvas has stayed in one place for a few frames, so clicks
-// computed from its position land where intended.
+// Since #43 the canvas is laid out before it first shows, so this normally
+// returns after its minimum 300 ms settle. It stays as a guard: Phaser re-lays the canvas out on its
+// own throttled check after any change in window size. Wait until the canvas
+// has stayed in one place for a few frames, so clicks computed from its
+// position land where intended.
 async function waitForSteadyCanvas(page) {
   await page.waitForFunction(
     () => {
@@ -129,8 +130,8 @@ export async function startGameDirectly(page) {
 }
 
 // Page coordinates of a point in the 960x540 game. Read right before every
-// click: the scale manager centres the canvas after the first frames, so a
-// position read once at load goes stale (#16).
+// click: the scale manager moves the canvas after any change in window size,
+// so a position read earlier can go stale (#16).
 export async function gamePoint(page, x, y) {
   const box = await page.locator("canvas").boundingBox();
   return [box.x + (x * box.width) / 960, box.y + (y * box.height) / 540];

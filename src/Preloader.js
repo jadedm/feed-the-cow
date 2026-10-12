@@ -6,9 +6,9 @@ window.feedTheCow.Preloader = function (game) {
 };
 
 /**
- * How long to wait for the music to decode before starting anyway, in ms.
- * Without a limit, a browser that cannot decode the music never leaves this
- * screen.
+ * How long to wait for the music to decode, and for Quicksand to load, before
+ * starting anyway, in ms. Without a limit, a browser that cannot decode the
+ * music or fetch the font never leaves this screen.
  */
 window.feedTheCow.Preloader.DECODE_TIMEOUT_MS = 5000;
 
@@ -53,14 +53,27 @@ window.feedTheCow.Preloader.prototype = {
     // stays in the SoundManager forever, and destroying it on shutdown cuts
     // it off before it is heard.
     window.feedTheCow.selectSound = this.add.audio("select_audio");
+
+    // Phaser draws text once and only redraws it when it changes, so text
+    // drawn before Quicksand has loaded keeps the fallback font: the score
+    // stayed in serif until the first grass was eaten (#44). The font loads
+    // only when first used, so ask for it here.
+    this.fontReady = !document.fonts;
+    if (document.fonts) {
+      document.fonts.load("28px Quicksand").then(
+        function () { this.fontReady = true; }.bind(this),
+        function () { this.fontReady = true; }.bind(this)
+      );
+    }
   },
 
   update: function () {
     var decoded = this.cache.isSoundDecoded("game_audio");
     var waited = this.time.now - this.loadedAt;
     var timedOut = waited > window.feedTheCow.Preloader.DECODE_TIMEOUT_MS;
+    var loaded = decoded && this.fontReady;
 
-    if (this.ready || !(decoded || timedOut)) return;
+    if (this.ready || !(loaded || timedOut)) return;
 
     this.ready = true;
     this.state.start("StartMenu");

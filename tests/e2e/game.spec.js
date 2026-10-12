@@ -36,6 +36,134 @@ test.describe("boot and assets", () => {
   });
 });
 
+test.describe("no third-party hosts", () => {
+  test("loads and starts a game with every other host blocked", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    const blocked = [];
+    const failed = [];
+    await page.route("**/*", (route) => {
+      if (new URL(route.request().url()).origin === origin) return route.continue();
+      blocked.push(route.request().url());
+      return route.abort();
+    });
+    page.on("requestfailed", (request) => {
+      if (new URL(request.url()).origin === origin) failed.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    // The auto fixture fails the test on any console error, such as a font
+    // that could not be downloaded (#44).
+    expect(failed).toEqual([]);
+    expect(blocked).toEqual([]);
+  });
+
+  test("the game's text is set in the site's own Quicksand", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    // Quicksand's state when the game first draws its score: Phaser does not
+    // redraw text when a font arrives later.
+    await page.addInitScript(() => {
+      const hook = setInterval(() => {
+        const states = window.feedTheCow;
+        if (!states || !states.Game) return;
+        const create = states.Game.prototype.create;
+        states.Game.prototype.create = function () {
+          const face = [...document.fonts].find((f) => f.family.replace(/["']/g, "") === "Quicksand");
+          window.__fontAtGameStart = face ? face.status : "missing";
+          return create.apply(this, arguments);
+        };
+        clearInterval(hook);
+      }, 1);
+    });
+    const fontRequests = [];
+    page.on("request", (request) => {
+      if (request.resourceType() === "font") fontRequests.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    const fonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return {
+        loaded: [...document.fonts]
+          .filter((face) => face.status === "loaded")
+          .map((face) => face.family.replace(/["']/g, "")),
+      };
+    });
+    expect(await page.evaluate(() => window.__fontAtGameStart)).toBe("loaded");
+    expect(fonts.loaded).toContain("Quicksand");
+    expect(fontRequests.length).toBeGreaterThan(0);
+    for (const url of fontRequests) expect(new URL(url).origin).toBe(origin);
+  });
+});
+
+// Records the canvas rect and whether it is visible on every animation frame
+// from page load until half a second after the start menu appears (at most
+// 15 s), as window.__canvasFrames; window.__canvasDone is set when it stops.
+async function recordCanvas(page) {
+  await page.addInitScript(() => {
+    window.__canvasFrames = [];
+    const t0 = performance.now();
+    const sample = () => {
+      const canvas = document.querySelector("canvas");
+      if (canvas) {
+        const r = canvas.getBoundingClientRect();
+        window.__canvasFrames.push({
+          t: performance.now() - t0,
+          visible: getComputedStyle(canvas).visibility !== "hidden",
+          rect: [r.left, r.top, r.width, r.height].map(Math.round).join(","),
+          menu: !!(window.__game && window.__game.state.current === "StartMenu"),
+        });
+      }
+      const menuAt = window.__canvasFrames.find((f) => f.menu);
+      const elapsed = performance.now() - t0;
+      if ((menuAt && elapsed > menuAt.t + 500) || elapsed > 15000) {
+        window.__canvasDone = true;
+        return;
+      }
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+}
+
+test.describe("canvas layout", () => {
+  for (const viewport of [null, { width: 600, height: 400 }]) {
+    test(`the canvas first shows already in place${viewport ? " in a 600x400 window" : ""}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await recordCanvas(page);
+      await page.goto("/");
+      await page.waitForFunction(() => window.__canvasDone, null, { timeout: 20_000 });
+      const frames = await page.evaluate(() => window.__canvasFrames);
+      const shown = frames.filter((f) => f.visible);
+      expect(shown.some((f) => f.menu), "start menu appeared while recording").toBe(true);
+      const final = frames[frames.length - 1].rect;
+      // One rect from the first visible frame on: no jump from the corner (#43).
+      expect([...new Set(shown.map((f) => f.rect))]).toEqual([final]);
+      // Shown before the start menu, and in place when it appears.
+      expect(shown[0].menu).toBe(false);
+      expect(shown.find((f) => f.menu).rect).toBe(final);
+      // Centred and within the 480 to 960 size limits. Compare with the page's
+      // innerWidth and innerHeight, which Phaser itself centres against on a
+      // phone, rather than Playwright's configured viewport size.
+      const [left, top, width, height] = final.split(",").map(Number);
+      const size = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      expect(width).toBeGreaterThanOrEqual(480);
+      expect(width).toBeLessThanOrEqual(960);
+      expect(Math.abs(left * 2 + width - size.width)).toBeLessThanOrEqual(2);
+      if (height < size.height) expect(Math.abs(top * 2 + height - size.height)).toBeLessThanOrEqual(2);
+    });
+  }
+
+  test("the canvas re-centres when the window is resized", async ({ page, isMobile }) => {
+    test.skip(isMobile, "fixed phone viewport");
+    await openGame(page);
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.waitForFunction(() => {
+      const r = document.querySelector("canvas").getBoundingClientRect();
+      return Math.abs(r.left * 2 + r.width - 1400) <= 2 && Math.abs(r.top * 2 + r.height - 900) <= 2;
+    });
+  });
+});
+
 test.describe("cow", () => {
   test("plays all eight run frames", async ({ page }) => {
     await openGame(page);

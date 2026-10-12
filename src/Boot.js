@@ -1,6 +1,11 @@
 window.feedTheCow.Boot = function (game) {};
 
 window.feedTheCow.Boot.prototype = {
+  init: function () {
+    // Hidden in main.js until the first layout has centred it (#43).
+    this.game.canvas.style.visibility = "";
+  },
+
   preload: function () {
     this.load.image("preloadBar", "src/images/loader_bar.png");
     this.load.image("titleimage", "src/images/TitleImage.png");
@@ -9,10 +14,6 @@ window.feedTheCow.Boot.prototype = {
   create: function () {
     this.input.maxPointers = 1;
     this.stage.disableVisibilityChange = false;
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    this.scale.setMinMax(480, 260, 960, 540);
-    this.scale.pageAlignHorizontally = true;
-    this.scale.pageAlignVertically = true;
     this.input.addPointer();
     this.stage.backgroundColor = "#F8DD52";
 

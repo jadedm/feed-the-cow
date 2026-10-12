@@ -11,6 +11,7 @@
 //   under src/ (Phaser's own library files excepted) and in dist/index.html
 // - local src and href attributes in dist/index.html
 // - local url() references in the built stylesheets under dist/assets/
+// - a fixed list of license files that must ship with what they cover
 //
 // What it cannot see: paths built at runtime, such as "src/images/" + name.
 // Write asset paths as whole string literals so this check covers them.
@@ -67,8 +68,12 @@ if (!existsSync(join(DIST, "index.html"))) {
   process.exit(1);
 }
 
+// Licenses that must ship with what they cover. Nothing loads them, so the
+// scans above cannot see them.
+const REQUIRED = ["src/libs/THIRD-PARTY-LICENSES.txt", "src/fonts/OFL.txt"];
+
 const paths = [
-  ...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml(), ...pathsFromBuiltCss()]),
+  ...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml(), ...pathsFromBuiltCss(), ...REQUIRED]),
 ].sort();
 const missing = paths.filter((path) => !isFileInDist(path));
 
