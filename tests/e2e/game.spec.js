@@ -393,6 +393,76 @@ test.describe("items", () => {
     expect(Math.max(...ys) + 30).toBeLessThanOrEqual(514);
   });
 
+  test("injections spawn only below the sky, where they can reach the cow", async ({ page }) => {
+    await openGame(page);
+    await startGameDirectly(page);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.timer.pause();
+      state.spawnAdditionalInjections(21);
+      const ys = state.injectionGroup.children.filter((j) => j.alive).map((j) => j.y);
+      for (let i = 0; i < 100; i++) {
+        state.injectionGroup.forEachAlive((j) => {
+          state.respawnInjection(j);
+          ys.push(j.y);
+        });
+      }
+      return ys;
+    });
+    // The sky reaches y 105; the cow's box spans y 118 to 514 at most, so a
+    // 13 px tall injection must start between 110 and 500.
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(110);
+    expect(Math.max(...ys) + 13).toBeLessThanOrEqual(514);
+    expect(Math.min(...ys)).toBeLessThan(130);
+    expect(Math.max(...ys)).toBeGreaterThan(480);
+  });
+
+  test("injections placed by the no-clear-spot fallback stay in the band too", async ({ page }) => {
+    await openGame(page);
+    await startGameDirectly(page);
+    const ys = await page.evaluate(() => {
+      const state = window.__game.state.getCurrentState();
+      state.timer.pause();
+      state.tooClose = () => true;
+      const ys = [];
+      for (let i = 0; i < 200; i++) {
+        const j = state.injectionGroup.getFirstAlive();
+        state.respawnInjection(j);
+        ys.push(j.y);
+      }
+      return ys;
+    });
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(110);
+    expect(Math.max(...ys) + 13).toBeLessThanOrEqual(514);
+  });
+
+  for (const [where, cowY, spawnY] of [["highest", -500, "SPAWN_Y_MIN_INJECTION"], ["lowest", 1000, "SPAWN_Y_MAX_INJECTION"]]) {
+    test(`an injection at the ${where} spawn line hits the cow at its ${where}`, async ({ page }) => {
+      await openGame(page);
+      await startGameDirectly(page);
+      const result = await page.evaluate(
+        async ([y, key]) => {
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          const state = window.__game.state.getCurrentState();
+          state.timer.pause();
+          state.injectionGroup.forEachAlive((j) => j.kill());
+          state.cow.x = 200;
+          state.cow.y = y;
+          await sleep(100);
+          const cowY = state.cow.y;
+          const injection = state.injectionGroup.getFirstDead();
+          injection.revive();
+          injection.reset(state.cow.x + 60, window.feedTheCow.Game[key]);
+          await sleep(200);
+          return { cowY, gameOver: state.gameOver };
+        },
+        [cowY, spawnY]
+      );
+      expect(result.cowY).toBe(where === "highest" ? 106 : 440);
+      expect(result.gameOver).toBe(true);
+    });
+  }
+
   test("every grass scrolls off the left and comes back on the right", async ({ page }) => {
     await openGame(page);
     await startGameDirectly(page);
