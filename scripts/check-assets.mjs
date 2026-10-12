@@ -11,6 +11,7 @@
 //   under src/ (Phaser's own library files excepted) and in dist/index.html
 // - local src and href attributes in dist/index.html
 // - local url() references in the built stylesheets under dist/assets/
+// - a fixed list of license files that must ship with what they cover
 //
 // What it cannot see: paths built at runtime, such as "src/images/" + name.
 // Write asset paths as whole string literals so this check covers them.
