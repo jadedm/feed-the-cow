@@ -36,6 +36,65 @@ test.describe("boot and assets", () => {
   });
 });
 
+test.describe("no third-party hosts", () => {
+  test("loads and starts a game with every other host blocked", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    const blocked = [];
+    const failed = [];
+    await page.route("**/*", (route) => {
+      if (new URL(route.request().url()).origin === origin) return route.continue();
+      blocked.push(route.request().url());
+      return route.abort();
+    });
+    page.on("requestfailed", (request) => {
+      if (new URL(request.url()).origin === origin) failed.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    // The auto fixture fails the test on any console error, such as a font
+    // that could not be downloaded (#44).
+    expect(failed).toEqual([]);
+    expect(blocked).toEqual([]);
+  });
+
+  test("the game's text is set in the site's own Quicksand", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    // Quicksand's state when the game first draws its score: Phaser does not
+    // redraw text when a font arrives later.
+    await page.addInitScript(() => {
+      const hook = setInterval(() => {
+        const states = window.feedTheCow;
+        if (!states || !states.Game) return;
+        const create = states.Game.prototype.create;
+        states.Game.prototype.create = function () {
+          const face = [...document.fonts].find((f) => f.family.replace(/["']/g, "") === "Quicksand");
+          window.__fontAtGameStart = face ? face.status : "missing";
+          return create.apply(this, arguments);
+        };
+        clearInterval(hook);
+      }, 1);
+    });
+    const fontRequests = [];
+    page.on("request", (request) => {
+      if (request.resourceType() === "font") fontRequests.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    const fonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return {
+        loaded: [...document.fonts]
+          .filter((face) => face.status === "loaded")
+          .map((face) => face.family.replace(/["']/g, "")),
+      };
+    });
+    expect(await page.evaluate(() => window.__fontAtGameStart)).toBe("loaded");
+    expect(fonts.loaded).toContain("Quicksand");
+    expect(fontRequests.length).toBeGreaterThan(0);
+    for (const url of fontRequests) expect(new URL(url).origin).toBe(origin);
+  });
+});
+
 // Records the canvas rect and whether it is visible on every animation frame
 // from page load until half a second after the start menu appears (at most
 // 15 s), as window.__canvasFrames; window.__canvasDone is set when it stops.

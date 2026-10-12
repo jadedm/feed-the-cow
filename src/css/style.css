@@ -3,6 +3,16 @@
 
 */
 
+/* Quicksand for the game's text, served from the site (src/fonts/OFL.txt)
+   so the game and its tests do not depend on Google Fonts (#44). Only the
+   Latin subset at weight 400 is used. */
+@font-face {
+    font-family: "Quicksand";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/quicksand-latin-400.woff2") format("woff2");
+}
+
 body {
     margin: 0px 0px 1px 0px; /* the extra 1px allows the iOS inner/outer check to work */
     background: #000;
