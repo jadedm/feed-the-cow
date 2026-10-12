@@ -36,6 +36,51 @@ test.describe("boot and assets", () => {
   });
 });
 
+test.describe("no third-party hosts", () => {
+  test("loads and starts a game with every other host blocked", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    const blocked = [];
+    const failed = [];
+    await page.route("**/*", (route) => {
+      if (new URL(route.request().url()).origin === origin) return route.continue();
+      blocked.push(route.request().url());
+      return route.abort();
+    });
+    page.on("requestfailed", (request) => {
+      if (new URL(request.url()).origin === origin) failed.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    // The auto fixture fails the test on any console error, such as a font
+    // that could not be downloaded (#44).
+    expect(failed).toEqual([]);
+    expect(blocked).toEqual([]);
+  });
+
+  test("the game's text is set in the site's own Quicksand", async ({ page, baseURL }) => {
+    const origin = new URL(baseURL).origin;
+    const fontRequests = [];
+    page.on("request", (request) => {
+      if (request.resourceType() === "font") fontRequests.push(request.url());
+    });
+    await openGame(page);
+    await startGameDirectly(page);
+    const fonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return {
+        loaded: [...document.fonts]
+          .filter((face) => face.status === "loaded")
+          .map((face) => face.family.replace(/["']/g, "")),
+        usable: document.fonts.check("30px Quicksand"),
+      };
+    });
+    expect(fonts.loaded).toContain("Quicksand");
+    expect(fonts.usable).toBe(true);
+    expect(fontRequests.length).toBeGreaterThan(0);
+    for (const url of fontRequests) expect(new URL(url).origin).toBe(origin);
+  });
+});
+
 test.describe("cow", () => {
   test("plays all eight run frames", async ({ page }) => {
     await openGame(page);

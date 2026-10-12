@@ -18,7 +18,7 @@ The images in `screenshots/` are taken from the built game by `scripts/take-scre
 
 ## Quicksand
 
-The page loads Quicksand from Google Fonts, and the lettering in the art is rendered with it. Quicksand is by Andrew Paglinawan and the Quicksand Project Authors, under the SIL Open Font License 1.1. No font files are stored in this repository.
+The game's text is set in Quicksand, served from this repository: `src/fonts/quicksand-latin-400.woff2` is Google Fonts' Latin subset at weight 400, unmodified, and its license is `src/fonts/OFL.txt`. The lettering in the art is rendered with Quicksand loaded from Google Fonts when the art is re-rendered (`art/render-art.mjs`). Quicksand is by Andrew Paglinawan and the Quicksand Project Authors, under the SIL Open Font License 1.1.
 
 ## Third-party code
 
