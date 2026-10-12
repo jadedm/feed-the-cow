@@ -67,8 +67,12 @@ if (!existsSync(join(DIST, "index.html"))) {
   process.exit(1);
 }
 
+// Licenses that must ship with what they cover. Nothing loads them, so the
+// scans above cannot see them.
+const REQUIRED = ["src/libs/THIRD-PARTY-LICENSES.txt", "src/fonts/OFL.txt"];
+
 const paths = [
-  ...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml(), ...pathsFromBuiltCss()]),
+  ...new Set([...pathsFromGameCode(), ...pathsFromBuiltHtml(), ...pathsFromBuiltCss(), ...REQUIRED]),
 ].sort();
 const missing = paths.filter((path) => !isFileInDist(path));
 

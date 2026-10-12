@@ -59,6 +59,21 @@ test.describe("no third-party hosts", () => {
 
   test("the game's text is set in the site's own Quicksand", async ({ page, baseURL }) => {
     const origin = new URL(baseURL).origin;
+    // Quicksand's state when the game first draws its score: Phaser does not
+    // redraw text when a font arrives later.
+    await page.addInitScript(() => {
+      const hook = setInterval(() => {
+        const states = window.feedTheCow;
+        if (!states || !states.Game) return;
+        const create = states.Game.prototype.create;
+        states.Game.prototype.create = function () {
+          const face = [...document.fonts].find((f) => f.family.replace(/["']/g, "") === "Quicksand");
+          window.__fontAtGameStart = face ? face.status : "missing";
+          return create.apply(this, arguments);
+        };
+        clearInterval(hook);
+      }, 1);
+    });
     const fontRequests = [];
     page.on("request", (request) => {
       if (request.resourceType() === "font") fontRequests.push(request.url());
@@ -71,11 +86,10 @@ test.describe("no third-party hosts", () => {
         loaded: [...document.fonts]
           .filter((face) => face.status === "loaded")
           .map((face) => face.family.replace(/["']/g, "")),
-        usable: document.fonts.check("30px Quicksand"),
       };
     });
+    expect(await page.evaluate(() => window.__fontAtGameStart)).toBe("loaded");
     expect(fonts.loaded).toContain("Quicksand");
-    expect(fonts.usable).toBe(true);
     expect(fontRequests.length).toBeGreaterThan(0);
     for (const url of fontRequests) expect(new URL(url).origin).toBe(origin);
   });

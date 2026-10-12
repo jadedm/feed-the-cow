@@ -24,7 +24,7 @@ npm-debug.log*
 *~
 archive/
 # Local agent instructions: CLAUDE.md is gitignored and AGENTS.md is a symlink to it
-AGENTS.md
+/AGENTS.md
 
 # Playwright output
 test-results/
